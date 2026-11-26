@@ -1,10 +1,42 @@
 var SHEET_ID = '1Qv_TxvPY0_64ZVbVG2s8ZLvLyFJxtctCKsjealm23fE';
 var DEFAULT_LEGACY_TOURNAMENT_ID = 'VB-2026';
 
-function doGet() {
+function jsonResponse(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function doGet(e) {
+  if (e && e.parameter && e.parameter.action) {
+    try {
+      var action = e.parameter.action;
+      var tid = e.parameter.tournamentId || "";
+      if (action === "getTournaments") return jsonResponse({ ok: true, data: getTournaments() });
+      if (action === "getPointsTable") return jsonResponse({ ok: true, data: getPointsTable(tid) });
+      if (action === "getFixtures") return jsonResponse({ ok: true, data: getFixtures(tid) });
+      if (action === "getTeams") return jsonResponse({ ok: true, data: getTeams(tid) });
+      if (action === "getTeamRoster") return jsonResponse({ ok: true, data: getTeamRoster(e.parameter.teamName || "", tid) });
+      return jsonResponse({ ok: false, error: "Unknown action: " + action });
+    } catch (err) {
+      return jsonResponse({ ok: false, error: err.message });
+    }
+  }
   return HtmlService.createHtmlOutputFromFile('Index')
       .setTitle('Sports Tournament Portal')
       .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}
+
+function doPost(e) {
+  try {
+    var body = JSON.parse(e.postData.contents);
+    var action = body.action;
+    var payload = body.payload;
+    if (action === "registerTeam") return jsonResponse({ ok: true, data: registerTeam(payload) });
+    if (action === "registerPlayers") return jsonResponse({ ok: true, data: registerPlayers(payload) });
+    return jsonResponse({ ok: false, error: "Unknown action: " + action });
+  } catch (err) {
+    return jsonResponse({ ok: false, error: err.message });
+  }
 }
 
 /**
@@ -19,9 +51,9 @@ function getTournaments() {
     sheet = ss.insertSheet("Tournaments");
     sheet.appendRow([
       "Tournament ID", "Sport", "Year", "Tournament Name", "Status",
-      "Deadline", "Logo URL", "Rules", "Max Players", "Max Officials"
+      "Deadline", "Logo URL", "Rules", "Max Players", "Max Officials", "Divisions"
     ]);
-    sheet.getRange("A1:J1").setFontWeight("bold");
+    sheet.getRange("A1:K1").setFontWeight("bold");
     
     // Migrate existing settings if available
     var oldSettings = ss.getSheetByName("Settings");
@@ -39,12 +71,13 @@ function getTournaments() {
       if (oldSettings.getRange("B5").getValue()) maxP = oldSettings.getRange("B5").getValue();
       if (oldSettings.getRange("B6").getValue()) maxO = oldSettings.getRange("B6").getValue();
     }
-    sheet.appendRow([DEFAULT_LEGACY_TOURNAMENT_ID, "Volleyball", 2026, name, "Active", deadline, logo, rules, maxP, maxO]);
+    sheet.appendRow([DEFAULT_LEGACY_TOURNAMENT_ID, "Volleyball", 2026, name, "Active", deadline, logo, rules, maxP, maxO, "Both"]);
   }
   
   var lastRow = sheet.getLastRow();
   if (lastRow < 2) return [];
-  var data = sheet.getRange(2, 1, lastRow - 1, 10).getValues();
+  var numCols = Math.max(sheet.getLastColumn(), 11);
+  var data = sheet.getRange(2, 1, lastRow - 1, numCols).getValues();
   var now = new Date();
   var list = [];
   
@@ -72,6 +105,7 @@ function getTournaments() {
       rules: String(data[i][7] || ""),
       maxPlayers: parseInt(data[i][8]) || 14,
       maxOfficials: parseInt(data[i][9]) || 3,
+      divisions: String(data[i][10] || "Both").trim(),
       isClosed: isClosed
     });
   }
@@ -99,6 +133,15 @@ function matchesTournament(cellValue, targetId) {
   // Backward compatibility for legacy rows with blank Tournament ID
   if (val === "" && target === DEFAULT_LEGACY_TOURNAMENT_ID) return true;
   return false;
+}
+
+/**
+ * Run this function ONCE inside the Apps Script editor to grant Google Drive permissions.
+ */
+function authorizeDrive() {
+  var root = DriveApp.getRootFolder();
+  Logger.log("Google Drive Authorized! Root folder: " + root.getName());
+  return "Authorized";
 }
 
 function registerTeam(data) {
@@ -130,13 +173,24 @@ function registerTeam(data) {
     logoUrl = data.logoLink.trim();
   } else if (data.logoBase64) {
     try {
-      var blob = Utilities.newBlob(Utilities.base64Decode(data.logoBase64), data.logoMimeType, data.logoName);
+      var blob = Utilities.newBlob(
+        Utilities.base64Decode(data.logoBase64),
+        data.logoMimeType || "image/png",
+        data.logoName || "team_logo.png"
+      );
       var file = DriveApp.createFile(blob);
       try { file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch (e) {}
       logoUrl = "https://lh3.googleusercontent.com/d/" + file.getId();
     } catch (e) {
-      logoUrl = "Error uploading";
+      // Fallback: if DriveApp permission is missing or blocked, save compressed Data URL directly
+      if (data.logoDataUrl && data.logoDataUrl.length < 45000) {
+        logoUrl = data.logoDataUrl;
+      } else {
+        logoUrl = "Error uploading: " + e.message;
+      }
     }
+  } else if (data.logoDataUrl && data.logoDataUrl.length < 45000) {
+    logoUrl = data.logoDataUrl;
   }
   
   sheet.appendRow([
@@ -208,14 +262,14 @@ function getPointsTable(tournamentId) {
   var lastRow = sheet.getLastRow();
   if (lastRow < 2) return [];
   
-  var numCols = Math.max(sheet.getLastColumn(), 15);
+  var numCols = Math.max(sheet.getLastColumn(), 16);
   var raw = sheet.getRange(2, 1, lastRow - 1, numCols).getValues();
   var filtered = [];
   
   for (var i = 0; i < raw.length; i++) {
     if (!raw[i][1]) continue;
     if (matchesTournament(raw[i][14], tournamentId)) {
-      filtered.push(raw[i].slice(0, 15));
+      filtered.push(raw[i].slice(0, 16));
     }
   }
   
@@ -240,7 +294,7 @@ function getFixtures(tournamentId) {
   var lastRow = sheet.getLastRow();
   if (lastRow < 2) return [];
   
-  var numCols = Math.max(sheet.getLastColumn(), 9);
+  var numCols = Math.max(sheet.getLastColumn(), 10);
   var data = sheet.getRange(2, 1, lastRow - 1, numCols).getValues();
   var filtered = [];
   var tz = Session.getScriptTimeZone();
@@ -249,7 +303,7 @@ function getFixtures(tournamentId) {
     if (!data[i][0] && !data[i][3]) continue;
     if (!matchesTournament(data[i][8], tournamentId)) continue;
     
-    var row = data[i].slice(0, 9);
+    var row = data[i].slice(0, 10);
     if (row[1] instanceof Date) {
       row[1] = Utilities.formatDate(row[1], tz, "yyyy-MM-dd");
     }
@@ -268,7 +322,7 @@ function getTeams(tournamentId) {
   var lastRow = sheet.getLastRow();
   if (lastRow < 2) return [];
   
-  var numCols = Math.max(sheet.getLastColumn(), 9);
+  var numCols = Math.max(sheet.getLastColumn(), 10);
   var data = sheet.getRange(2, 1, lastRow - 1, numCols).getValues();
   var approvedTeams = [];
   
@@ -281,7 +335,8 @@ function getTeams(tournamentId) {
       approvedTeams.push({
         name: String(data[i][1]).trim(),
         logo: String(data[i][5] || "").trim(),
-        division: String(data[i][6] || "Men's").trim()
+        division: String(data[i][6] || "Men's").trim(),
+        group: String(data[i][9] || "").trim()
       });
     }
   }
