@@ -72,10 +72,17 @@ function getTournaments() {
   if (lastRow < 2) return [];
   var numCols = Math.max(sheet.getLastColumn(), 11);
   var data = sheet.getRange(2, 1, lastRow - 1, numCols).getValues();
+  var tz = Session.getScriptTimeZone();
   var list = [];
 
   for (var i = 0; i < data.length; i++) {
     if (!data[i][0]) continue;
+    var deadlineStr = "";
+    if (data[i][5] instanceof Date) {
+      deadlineStr = Utilities.formatDate(data[i][5], tz, "yyyy-MM-dd'T'HH:mm");
+    } else if (data[i][5]) {
+      deadlineStr = String(data[i][5]).trim();
+    }
     list.push({
       row: i + 2,
       id: String(data[i][0]).trim(),
@@ -83,7 +90,7 @@ function getTournaments() {
       year: String(data[i][2] || "").trim(),
       name: String(data[i][3] || "").trim(),
       status: String(data[i][4] || "Active").trim(),
-      deadline: data[i][5] ? String(data[i][5]) : "",
+      deadline: deadlineStr,
       logo: String(data[i][6] || "").trim(),
       rules: String(data[i][7] || ""),
       maxPlayers: data[i][8] || 14,
@@ -160,6 +167,11 @@ function updateTournamentSettings(data) {
   }
   if (rowIndex === -1) return "Error: Tournament ID not found.";
 
+  // Ensure Column K header exists on older sheets
+  if (!sheet.getRange(1, 11).getValue()) {
+    sheet.getRange(1, 11).setValue("Divisions");
+  }
+
   sheet.getRange(rowIndex, 4).setValue(String(data.name || "").trim());
   sheet.getRange(rowIndex, 5).setValue(data.status || "Active");
   sheet.getRange(rowIndex, 6).setValue(data.deadline || "");
@@ -168,11 +180,16 @@ function updateTournamentSettings(data) {
   sheet.getRange(rowIndex, 10).setValue(data.maxOfficials || 3);
   sheet.getRange(rowIndex, 11).setValue(data.divisions || "Both");
 
-  if ((data.logoLink && data.logoLink.trim() !== "") || data.logoBase64) {
-    var logoUrl = saveImageToDriveOrLink(data.logoLink, data.logoBase64, data.logoMimeType, data.logoName);
-    if (logoUrl) sheet.getRange(rowIndex, 7).setValue(logoUrl);
+  if (data.logoBase64) {
+    var uploadedLogo = saveImageToDriveOrLink("", data.logoBase64, data.logoMimeType, data.logoName);
+    if (uploadedLogo && uploadedLogo.indexOf("Error") !== 0) {
+      sheet.getRange(rowIndex, 7).setValue(uploadedLogo);
+    }
+  } else if (data.logoLink !== undefined) {
+    sheet.getRange(rowIndex, 7).setValue(String(data.logoLink).trim());
   }
 
+  SpreadsheetApp.flush();
   return "Tournament settings saved successfully!";
 }
 
