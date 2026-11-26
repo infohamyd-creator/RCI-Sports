@@ -1,6 +1,6 @@
 var SHEET_ID = '1Qv_TxvPY0_64ZVbVG2s8ZLvLyFJxtctCKsjealm23fE';
 var DEFAULT_LEGACY_TOURNAMENT_ID = 'VB-2026';
-var ADMIN_PASSWORD = 'RCI@2026'; // <-- Change this to your preferred Admin password
+var ADMIN_PASSWORD = 'admin123'; // <-- Change this to your preferred Admin password
 
 function verifyAdminPassword(inputPassword) {
   return String(inputPassword || "").trim() === String(ADMIN_PASSWORD).trim();
