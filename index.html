@@ -457,8 +457,8 @@
 
       function apiGet(action, params, onSuccess, onFailure) {
         if (API_URL && API_URL.trim() !== "") {
-          var qs = new URLSearchParams(Object.assign({ action: action }, params || {})).toString();
-          fetch(API_URL.trim() + "?" + qs, { method: "GET" })
+          var qs = new URLSearchParams(Object.assign({ action: action, _t: Date.now() }, params || {})).toString();
+          fetch(API_URL.trim() + "?" + qs, { method: "GET", cache: "no-store" })
             .then(function(res) { return res.json(); })
             .then(function(json) {
               if (json && json.ok) { if (onSuccess) onSuccess(json.data); }
