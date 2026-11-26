@@ -891,9 +891,14 @@
               showMessage('settingsMsg', msg);
               btn.disabled = false;
               btn.innerText = "Save Tournament Settings";
+              document.getElementById('editLogoFile').value = "";
               loadTournamentsList();
             })
-            .withFailureHandler(showError)
+            .withFailureHandler(function(err) {
+              btn.disabled = false;
+              btn.innerText = "Save Tournament Settings";
+              showError(err);
+            })
             .updateTournamentSettings({
               tournamentId: selectedTournament.id,
               name: document.getElementById('editName').value,
@@ -910,7 +915,7 @@
             });
         }
 
-        if (file && !link) {
+        if (file) {
           var reader = new FileReader();
           reader.onload = function(e) { sendSettings(e.target.result.split(',')[1], file.type, file.name); };
           reader.readAsDataURL(file);
