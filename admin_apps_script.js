@@ -7,9 +7,17 @@ function verifyAdminPassword(inputPassword) {
 }
 
 function doGet() {
-  return HtmlService.createHtmlOutputFromFile('AdminIndex')
-      .setTitle('Admin Panel - Multi-Sport Tournament Portal')
-      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  var possibleNames = ['AdminIndex', 'Index', 'Admin', 'index', 'admin'];
+  for (var i = 0; i < possibleNames.length; i++) {
+    try {
+      return HtmlService.createHtmlOutputFromFile(possibleNames[i])
+          .setTitle('Admin Panel - Multi-Sport Tournament Portal')
+          .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+    } catch (e) {
+      // Try next file name
+    }
+  }
+  throw new Error("No HTML file found. Please rename your HTML file in Apps Script to 'AdminIndex' or 'Index'.");
 }
 
 function matchesTournament(cellValue, targetId) {
