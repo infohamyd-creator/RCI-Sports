@@ -1,1192 +1,922 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
   <head>
-    <meta charset="UTF-8">
     <base target="_top">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sports Tournament Portal</title>
     <style>
-      :root {
-        --primary: #0F3D3E;
-        --primary-hover: #0a292a;
-        --light-accent: #e6f4f1;
-        --dark-bg: #111827;
-        --border: #d1d5db;
-      }
-
-      body {
-        font-family: 'Segoe UI', Arial, sans-serif;
-        padding: 15px;
-        max-width: 1000px;
-        margin: auto;
-        color: #1f2937;
-        background-color: #f9fafb;
-      }
-
-      /* Top Portal Selector Bar */
-      .portal-bar {
-        background: var(--dark-bg);
-        color: white;
-        padding: 14px 18px;
-        border-radius: 10px;
-        margin-bottom: 20px;
+      :root { --admin-red: #8B0000; --admin-light: #fce8e8; --dark-bg: #111827; --border: #d1d5db; }
+      body { font-family: 'Segoe UI', Arial, sans-serif; padding: 15px; max-width: 960px; margin: auto; color: #1f2937; background-color: #f9fafb; }
+      .admin-warning { text-align: center; color: white; background-color: var(--dark-bg); padding: 8px; font-weight: bold; font-size: 13px; margin-bottom: 12px; border-radius: 6px; letter-spacing: 0.5px; }
+      
+      /* Active Tournament Bar */
+      .context-bar {
+        background: white;
+        border: 2px solid var(--admin-red);
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin-bottom: 18px;
         display: flex;
         flex-wrap: wrap;
         align-items: center;
         justify-content: space-between;
-        gap: 12px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+        gap: 10px;
       }
-      .sport-pills {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-      }
-      .sport-pill {
-        background: rgba(255, 255, 255, 0.12);
-        color: #e5e7eb;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        padding: 8px 14px;
-        border-radius: 20px;
-        cursor: pointer;
-        font-weight: bold;
-        font-size: 14px;
-        transition: 0.2s;
-      }
-      .sport-pill:hover { background: rgba(255, 255, 255, 0.22); }
-      .sport-pill.active {
-        background: #10b981;
-        color: #fff;
-        border-color: #10b981;
-      }
-      .year-selector-wrap {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        flex: 1;
-        min-width: 220px;
-        justify-content: flex-end;
-      }
-      .year-selector-wrap select {
-        width: auto;
-        min-width: 220px;
-        max-width: 100%;
-        margin: 0;
-        padding: 8px 12px;
-        border-radius: 6px;
-        font-weight: bold;
-        background: white;
-        color: #111;
-      }
+      .context-bar label { font-weight: bold; color: var(--admin-red); font-size: 14px; }
+      .context-bar select { width: auto; min-width: 280px; margin: 0; font-weight: bold; border: 1px solid var(--admin-red); }
 
-      /* Header */
-      .header-container {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: center;
-        gap: 18px;
-        margin-bottom: 20px;
-        background: white;
-        padding: 18px;
-        border-radius: 10px;
-        border: 1px solid var(--border);
-      }
-      .main-logo { max-height: 75px; display: none; border-radius: 8px; object-fit: contain; }
-      .header-text { text-align: left; }
-      .header-title { color: var(--primary); font-weight: 800; font-size: 26px; text-transform: uppercase; margin: 0; }
-      .header-sub { font-size: 13px; color: #6b7280; margin-top: 4px; font-weight: bold; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-
-      .status-pill { padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
-      .status-active { background: #d1fae5; color: #065f46; }
-      .status-archived { background: #e5e7eb; color: #374151; }
-      .status-upcoming { background: #dbeafe; color: #1e40af; }
-
-      /* Tabs */
-      .tab {
-        overflow: hidden;
-        border: 1px solid var(--border);
-        background-color: #f1f5f9;
-        border-radius: 8px 8px 0 0;
-        display: flex;
-        flex-wrap: wrap;
-      }
-      .tab button {
-        background-color: inherit;
-        border: none;
-        outline: none;
-        cursor: pointer;
-        padding: 13px 14px;
-        transition: 0.2s;
-        font-size: 14px;
-        font-weight: bold;
-        flex: 1;
-        color: #4b5563;
-      }
+      .tab { overflow: hidden; border: 1px solid var(--border); background-color: #f1f5f9; border-radius: 8px 8px 0 0; display: flex; flex-wrap: wrap; }
+      .tab button { background-color: inherit; border: none; outline: none; cursor: pointer; padding: 13px 12px; transition: 0.2s; font-size: 14px; font-weight: bold; flex: 1; color: #4b5563; }
       .tab button:hover { background-color: #e2e8f0; }
-      .tab button.active { background-color: var(--primary); color: white; }
-      .tabcontent {
-        display: none;
-        padding: 22px;
-        border: 1px solid var(--border);
-        border-top: none;
-        border-radius: 0 0 8px 8px;
-        background-color: white;
-      }
+      .tab button.active { background-color: var(--admin-red); color: white; }
+      .tabcontent { display: none; padding: 22px; border: 1px solid var(--border); border-top: none; border-radius: 0 0 8px 8px; background-color: white; }
 
-      /* Forms & Buttons */
-      input, select, textarea {
-        width: 100%;
-        padding: 10px;
-        margin: 5px 0;
-        border: 1px solid var(--border);
-        border-radius: 6px;
-        box-sizing: border-box;
-        font-size: 14px;
-      }
+      input, select, textarea { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid var(--border); border-radius: 6px; box-sizing: border-box; font-size: 14px; }
       .form-group { margin-bottom: 14px; }
-      .form-group label { font-weight: bold; display: block; margin-bottom: 4px; color: var(--primary); }
-      button.submit-btn {
-        background-color: var(--primary);
-        color: white;
-        border: none;
-        cursor: pointer;
-        font-size: 15px;
-        font-weight: bold;
-        padding: 12px 16px;
-        border-radius: 6px;
-        width: 100%;
-        margin-top: 12px;
-      }
-      button.submit-btn:hover { background-color: var(--primary-hover); }
+      .form-group label { font-weight: bold; display: block; margin-bottom: 4px; color: var(--admin-red); font-size: 13px; }
+      .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+      button.submit-btn { background-color: var(--admin-red); color: white; border: none; cursor: pointer; font-size: 15px; font-weight: bold; padding: 12px 16px; border-radius: 6px; width: 100%; margin-top: 12px; }
+      button.submit-btn:hover { background-color: #600000; }
       button.submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-      .message {
-        color: var(--primary);
-        font-weight: bold;
-        margin-bottom: 15px;
-        padding: 12px;
-        border-radius: 6px;
-        background-color: var(--light-accent);
-        display: none;
-      }
-      .closed-msg {
-        text-align: center;
-        color: #b91c1c;
-        font-size: 15px;
-        font-weight: bold;
-        padding: 20px;
-        border: 2px dashed #ef4444;
-        border-radius: 8px;
-        background-color: #fef2f2;
-        margin-bottom: 15px;
-      }
-      .rules-content {
-        white-space: pre-wrap;
-        background-color: #f9fafb;
-        padding: 18px;
-        border-radius: 8px;
-        border: 1px solid var(--border);
-        line-height: 1.8;
-        font-size: 15px;
-      }
-
-      /* Tables */
+      .message { color: var(--admin-red); font-weight: bold; margin-bottom: 14px; padding: 12px; border-radius: 6px; background-color: var(--admin-light); display: none; }
       table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 14px; }
-      th, td { border: 1px solid #e5e7eb; padding: 10px 8px; text-align: center; vertical-align: middle; }
-      th { color: white; font-weight: bold; }
-      th.main-header-teal { background-color: var(--primary); }
-      th.main-header-dark { background-color: var(--dark-bg); }
-      .sub-th { background-color: var(--primary); font-size: 12px; }
-      .sub-th-dark { background-color: var(--dark-bg); font-size: 12px; }
-      tr:nth-child(even) { background-color: #f9fafb; }
-      .rank-circle {
-        background-color: var(--primary);
-        color: white;
-        width: 26px;
-        height: 26px;
-        border-radius: 50%;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        font-size: 13px;
-      }
-      .team-cell { display: flex; align-items: center; text-align: left; gap: 10px; font-weight: bold; }
-      .team-logo { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; background-color: #e5e7eb; flex-shrink: 0; }
-      .badge { padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; display: inline-block; }
-      .bg-upcoming { background-color: #e5e7eb; color: #374151; }
-      .bg-live { background-color: #dbeafe; color: #1e40af; }
-      .bg-completed { background-color: #d1fae5; color: #065f46; }
-      .group-badge { display: inline-block; padding: 3px 9px; border-radius: 12px; font-size: 11px; font-weight: bold; margin-top: 4px; background-color: #e0f2fe; color: #0369a1; }
-      .group-b { background-color: #fef3c7; color: #b45309; }
-      .group-ko { background-color: #ede9fe; color: #6d28d9; }
+      th, td { border: 1px solid #e5e7eb; padding: 10px; text-align: left; vertical-align: middle; }
+      th { background-color: var(--admin-red); color: white; font-weight: bold; text-align: center; }
+      .status-select { padding: 6px; border-radius: 4px; border: 1px solid #ccc; font-weight: bold; width: auto; margin: 0; }
+      .status-btn { background-color: var(--dark-bg); color: white; border: none; padding: 7px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; }
 
-      /* Team Cards */
-      .team-card {
-        border: 1px solid var(--border);
-        padding: 14px;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        gap: 14px;
-        background-color: #ffffff;
-        cursor: pointer;
-        transition: 0.2s;
+      /* Admin Login Overlay */
+      .login-overlay {
+        max-width: 400px;
+        margin: 60px auto;
+        background: white;
+        padding: 28px;
+        border-radius: 10px;
+        border: 2px solid var(--admin-red);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+        text-align: center;
       }
-      .team-card:hover { border-color: var(--primary); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08); transform: translateY(-1px); }
-      .team-card img { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; background: #eee; flex-shrink: 0; }
+      .login-overlay h2 { color: var(--admin-red); margin-top: 0; margin-bottom: 8px; }
+      .login-error { color: #dc2626; font-weight: bold; font-size: 13px; margin-top: 10px; display: none; }
 
-      /* Mobile Responsiveness */
-      @media (max-width: 650px) {
+      @media (max-width: 768px) {
+        .grid-3 { grid-template-columns: 1fr; }
+        .form-group[style*="grid-column: span"] { grid-column: span 1 !important; }
+        .context-bar { flex-direction: column; align-items: stretch; }
+        .context-bar select { width: 100%; min-width: 0; }
+        .tab button { flex: 1 1 50%; border-bottom: 1px solid #d1d5db; font-size: 13px; }
         body { padding: 10px; }
-        .portal-bar { flex-direction: column; align-items: stretch; }
-        .sport-pills { justify-content: center; }
-        .year-selector-wrap { justify-content: center; }
-        .year-selector-wrap select { width: 100%; }
-        .header-container { flex-direction: column; text-align: center; gap: 10px; }
-        .header-text { text-align: center; }
-        .header-sub { justify-content: center; }
-        .header-title { font-size: 20px; }
-        .tab button { flex: 1 1 50%; border-bottom: 1px solid #d1d5db; padding: 11px 8px; font-size: 13px; }
-        .tabcontent { padding: 14px; }
       }
     </style>
   </head>
   <body>
-    <div id="globalErrorBanner" class="closed-msg" style="display:none;"></div>
+    <!-- Password Login Screen -->
+    <div id="adminLoginOverlay" class="login-overlay">
+      <h2>🔒 Admin Panel Login</h2>
+      <p style="font-size:13px; color:#4b5563; margin-bottom:18px;">Enter the Admin Password to manage tournaments, teams, and scores.</p>
+      <form onsubmit="event.preventDefault(); submitAdminLogin();">
+        <input type="password" id="adminPasswordInput" placeholder="Enter Admin Password" required autocomplete="current-password">
+        <button type="submit" class="submit-btn" id="btnAdminLogin">Unlock Admin Panel</button>
+      </form>
+      <div id="adminLoginError" class="login-error">Incorrect password. Please try again.</div>
+    </div>
 
-    <!-- Top Multi-Sport & Multi-Year Portal Bar -->
-    <div class="portal-bar">
-      <div class="sport-pills" id="sportPills">
-        <button class="sport-pill active" onclick="selectSport('Volleyball', this)">🏐 Volleyball</button>
-        <button class="sport-pill" onclick="selectSport('Futsal', this)">⚽ Futsal</button>
-        <button class="sport-pill" onclick="selectSport('Handball', this)">🤾 Handball</button>
+    <!-- Main Admin Panel (Hidden until authenticated) -->
+    <div id="adminMainContent" style="display:none;">
+      <div class="admin-warning" style="display:flex; justify-content:space-between; align-items:center; padding:8px 14px;">
+        <span>RESTRICTED AREA: MULTI-SPORT TOURNAMENT ADMIN PANEL</span>
+        <button type="button" onclick="lockAdminPanel()" style="background:#dc2626; color:white; border:none; padding:4px 10px; border-radius:4px; cursor:pointer; font-size:12px; font-weight:bold;">🔒 Lock</button>
       </div>
-      <div class="year-selector-wrap">
-        <span style="font-size:13px; color:#d1d5db; font-weight:bold;">Season:</span>
-        <select id="tournamentSelect" onchange="onTournamentChange()">
+      <div id="globalErrorBanner" class="admin-warning" style="display:none; background-color: #dc2626;"></div>
+
+      <!-- Active Tournament Context Selector -->
+      <div class="context-bar">
+        <label for="adminTournamentSelect">🎯 Currently Managing Tournament:</label>
+        <select id="adminTournamentSelect" onchange="onAdminTournamentChange()">
           <option value="">Loading tournaments...</option>
         </select>
       </div>
-    </div>
 
-    <!-- Active Tournament Header -->
-    <div class="header-container">
-      <img id="mainTournLogo" class="main-logo" src="" alt="Tournament Logo" referrerpolicy="no-referrer">
-      <div class="header-text">
-        <div class="header-title" id="tournamentTitle">Sports Tournament Portal</div>
-        <div class="header-sub" id="tournamentMeta">Select a sport and year above</div>
+      <!-- Admin Navigation Tabs -->
+      <div class="tab">
+        <button class="tablinks" onclick="openTab(event, 'TournamentsTab'); loadTournamentsList();" id="defaultOpen">🏆 Tournaments</button>
+        <button class="tablinks" onclick="openTab(event, 'ApprovalsTab'); loadApprovals();">✅ Approvals</button>
+        <button class="tablinks" onclick="openTab(event, 'UpdatePointsTab'); loadTeams();">📊 Standings</button>
+        <button class="tablinks" onclick="openTab(event, 'AddFixtureTab'); loadTeams(); loadAdminFixtures();">📅 Schedule & Scores</button>
+        <button class="tablinks" onclick="openTab(event, 'UpdateLogoTab'); loadTeams();">🖼️ Team Logo</button>
+        <button class="tablinks" onclick="openTab(event, 'SettingsTab'); populateSettingsForm();">⚙️ Edit Selected</button>
+      </div>
+
+    <!-- 0. Manage Tournaments (Add New Year / Sport) -->
+    <div id="TournamentsTab" class="tabcontent">
+      <h3 style="color: var(--admin-red); margin-top: 0;">Add New Tournament (New Year / Sport)</h3>
+      <p style="font-size:13px; color:#4b5563; margin-top:0;">Previous years' data stays safely saved in your Google Sheet. Add a new year's tournament below and mark old ones as <strong>Archived</strong>.</p>
+      <div id="createTournMsg" class="message"></div>
+      <form id="createTournForm" onsubmit="event.preventDefault(); processCreateTournament();">
+        <div class="grid-3">
+          <div class="form-group">
+            <label>Sport</label>
+            <select id="newTournSport" required>
+              <option value="Volleyball">🏐 Volleyball</option>
+              <option value="Futsal">⚽ Futsal</option>
+              <option value="Handball">🤾 Handball</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Year</label>
+            <input type="number" id="newTournYear" value="2026" min="2020" max="2099" required>
+          </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select id="newTournStatus">
+              <option value="Active">Active (Open)</option>
+              <option value="Upcoming">Upcoming</option>
+              <option value="Archived">Archived (Read-Only)</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid-3">
+          <div class="form-group" style="grid-column: span 2;">
+            <label>Tournament Name</label>
+            <input type="text" id="newTournName" placeholder="e.g. RCI Futsal Cup 2027" required>
+          </div>
+          <div class="form-group">
+            <label>Registration Deadline</label>
+            <input type="datetime-local" id="newTournDeadline">
+          </div>
+        </div>
+        <div class="grid-3">
+          <div class="form-group"><label>Max Players</label><input type="number" id="newTournMaxP" value="14"></div>
+          <div class="form-group"><label>Max Officials</label><input type="number" id="newTournMaxO" value="3"></div>
+          <div class="form-group">
+            <label>Divisions</label>
+            <select id="newTournDivisions">
+              <option value="Both">Both (Men's & Women's)</option>
+              <option value="Men's Only">Men's Only (Hide Women's)</option>
+              <option value="Women's Only">Women's Only (Hide Men's)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group"><label>Logo Link (Optional)</label><input type="url" id="newTournLogoLink" placeholder="https://..."></div>
+        <div class="form-group">
+          <label>Rules (Supports Dhivehi / RTL)</label>
+          <textarea id="newTournRules" rows="4" dir="rtl" placeholder="Enter tournament rules..."></textarea>
+        </div>
+        <button type="submit" class="submit-btn" id="btnCreateTourn">+ Create New Tournament</button>
+      </form>
+
+      <h3 style="color: var(--admin-red); margin-top: 30px; border-top: 1px solid #ddd; padding-top: 20px;">All Saved Tournaments (History & Active)</h3>
+      <div id="tournListMsg" class="message"></div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr><th>Year</th><th>Sport</th><th>Tournament Name</th><th>Status</th><th>Action</th></tr>
+          </thead>
+          <tbody id="tournamentsTableBody"><tr><td colspan="5" style="text-align:center;">Loading...</td></tr></tbody>
+        </table>
       </div>
     </div>
 
-    <!-- Navigation Tabs -->
-    <div class="tab">
-      <button class="tablinks" onclick="openTab(event, 'PointsTableTab'); loadPointsTable();" id="defaultOpen">📊 Standings</button>
-      <button class="tablinks" onclick="openTab(event, 'FixturesTab'); loadFixtures();">📅 Schedule</button>
-      <button class="tablinks" onclick="openTab(event, 'TeamsTab'); loadApprovedTeams();">👥 Teams</button>
-      <button class="tablinks" onclick="openTab(event, 'RulesTab')">📜 Rules</button>
-      <button class="tablinks" onclick="openTab(event, 'TeamRegistration')" id="btnRegTeam">📝 Register Team</button>
-      <button class="tablinks" onclick="openTab(event, 'PlayerRegistration'); loadTeamDropdown();" id="btnRegPlayer">🏃 Submit Players</button>
+    <!-- 1. Team Approvals Tab -->
+    <div id="ApprovalsTab" class="tabcontent">
+      <h3 style="color: var(--admin-red); margin-top: 0;">Team Approvals & Group Assignment</h3>
+      <p style="font-size:13px; color:#4b5563; margin-top:0;">Approve teams and assign them to <strong>Group A / Group B</strong> if the tournament uses groups.</p>
+      <div id="approvalMsg" class="message"></div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr><th>Team Name</th><th>Division</th><th>Captain</th><th>Group</th><th>Status</th><th>Action</th></tr>
+          </thead>
+          <tbody id="approvalsTableBody"><tr><td colspan="6" style="text-align:center;">Loading teams...</td></tr></tbody>
+        </table>
+      </div>
+      <button class="submit-btn" onclick="loadApprovals()" style="width: auto; padding: 8px 15px;">↻ Refresh</button>
     </div>
 
-    <!-- 1. Points Table -->
-    <div id="PointsTableTab" class="tabcontent">
-      <div id="pointsTableContainer"><div style="text-align:center; padding:20px;">Loading standings...</div></div>
-      <button class="submit-btn" onclick="loadPointsTable()" style="width: auto; padding: 8px 16px;">↻ Refresh Standings</button>
+    <!-- 2. Update Points Form -->
+    <div id="UpdatePointsTab" class="tabcontent">
+      <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:10px; margin-bottom:12px;">
+        <h3 style="color: var(--admin-red); margin: 0;">Update Standings</h3>
+        <button type="button" class="status-btn" id="btnRecalcPts" onclick="triggerRecalculatePoints()" style="background-color:#0F3D3E; padding:9px 14px;">⚡ Auto-Calculate from Match Scores</button>
+      </div>
+      <div id="updatePointsMsg" class="message"></div>
+      <form id="updatePointsForm" onsubmit="event.preventDefault(); submitPointsUpdate();">
+        <div class="form-group"><label>Select Team</label><select id="updTeam" required></select></div>
+        
+        <h4 style="border-bottom: 2px solid var(--admin-red); padding-bottom: 4px;">MATCHES</h4>
+        <div class="grid-3">
+          <div class="form-group"><label>Played (PLD)</label><input type="number" id="updMPld" value="0" required></div>
+          <div class="form-group"><label>Won (W)</label><input type="number" id="updMW" value="0" required></div>
+          <div class="form-group" id="drawFieldWrap" style="display:none;"><label>Drawn (D)</label><input type="number" id="updMD" value="0"></div>
+          <div class="form-group"><label>Lost (L)</label><input type="number" id="updML" value="0" required></div>
+          <div class="form-group"><label>Total Points (PTS)</label><input type="number" id="updMPts" value="0" required></div>
+        </div>
+
+        <h4 id="section2Title" style="border-bottom: 2px solid var(--admin-red); padding-bottom: 4px;">SETS</h4>
+        <div class="grid-3">
+          <div class="form-group"><label id="lblSW">Sets Won</label><input type="number" id="updSW" value="0" required></div>
+          <div class="form-group"><label id="lblSL">Sets Lost</label><input type="number" id="updSL" value="0" required></div>
+          <div class="form-group"><label id="lblSDiff">Sets +/-</label><input type="number" id="updSDiff" value="0" required></div>
+        </div>
+
+        <div id="volleyballPointsWrap">
+          <h4 style="border-bottom: 2px solid var(--admin-red); padding-bottom: 4px;">POINTS</h4>
+          <div class="grid-3">
+            <div class="form-group"><label>Points Won</label><input type="number" id="updPW" value="0"></div>
+            <div class="form-group"><label>Points Lost</label><input type="number" id="updPL" value="0"></div>
+            <div class="form-group"><label>Points +/-</label><input type="number" id="updPDiff" value="0"></div>
+          </div>
+        </div>
+
+        <button type="submit" class="submit-btn" id="btnUpdatePoints">Save Standings</button>
+      </form>
     </div>
 
-    <!-- 2. Schedule -->
-    <div id="FixturesTab" class="tabcontent">
-      <h3 style="color: var(--primary); margin-top: 0;">Match Schedule</h3>
+    <!-- 3. Add Fixture & Enter Scores Tab -->
+    <div id="AddFixtureTab" class="tabcontent">
+      <h3 style="color: var(--admin-red); margin-top: 0;">Enter Match Scores (Auto-Updates Points Table)</h3>
+      <p style="font-size:13px; color:#4b5563; margin-top:0;">Enter the final score for any match below and click <strong>Save Score</strong>. The Points Table will automatically calculate Wins, Losses, Draws, Goal/Set Differences, and Points!</p>
+      <div id="scoreUpdateMsg" class="message"></div>
       <div style="overflow-x:auto;">
         <table>
           <thead>
             <tr>
-              <th class="main-header-teal">Match ID</th>
-              <th class="main-header-teal">Date & Time</th>
-              <th class="main-header-teal">Matchup</th>
-              <th class="main-header-teal">Venue</th>
-              <th class="main-header-teal">Status</th>
-              <th class="main-header-teal">Result</th>
+              <th>Match</th>
+              <th>Date / Time</th>
+              <th>Matchup</th>
+              <th style="min-width:155px;">Score (A - B)</th>
+              <th id="thSetDetails" style="min-width:150px;">Set Points (Optional)</th>
+              <th>Status</th>
+              <th>Action</th>
             </tr>
           </thead>
-          <tbody id="fixturesTableBody"><tr><td colspan="6" style="text-align:center;">Loading schedule...</td></tr></tbody>
+          <tbody id="adminFixturesBody"><tr><td colspan="7" style="text-align:center;">Loading matches...</td></tr></tbody>
         </table>
       </div>
-      <button class="submit-btn" onclick="loadFixtures()" style="width: auto; padding: 8px 16px;">↻ Refresh Schedule</button>
-    </div>
+      <button type="button" class="submit-btn" onclick="loadAdminFixtures()" style="width: auto; padding: 8px 15px; margin-bottom: 24px; background-color: #4b5563;">↻ Refresh Matches</button>
 
-    <!-- 3. Teams Tab (Directory & Roster View) -->
-    <div id="TeamsTab" class="tabcontent">
-      <div id="teamDirectoryView">
-        <h3 style="color: var(--primary); margin-top: 0;">Participating Teams</h3>
-        <p style="color: #6b7280; font-size: 14px;">Select a team to view their registered players and officials.</p>
-        <div id="approvedTeamsDirectory" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; margin-top: 15px;">
-          <div style="text-align:center; grid-column: 1 / -1;">Loading teams...</div>
+      <h3 style="color: var(--admin-red); border-top: 2px solid #e5e7eb; padding-top: 20px;">+ Schedule New Match</h3>
+      <div id="addFixtureMsg" class="message"></div>
+      <form id="addFixtureForm" onsubmit="event.preventDefault(); submitFixture();">
+        <div class="grid-3">
+          <div class="form-group"><label>Match ID</label><input type="text" id="fixId" placeholder="e.g. Match 01" required></div>
+          <div class="form-group"><label>Date</label><input type="date" id="fixDate" required></div>
+          <div class="form-group"><label>Time</label><input type="time" id="fixTime" required></div>
         </div>
-      </div>
-
-      <div id="teamDetailView" style="display: none;">
-        <button class="submit-btn" onclick="showTeamDirectory()" style="width: auto; padding: 8px 15px; margin-bottom: 18px; background-color: #4b5563;">← Back to Teams</button>
-        <div class="team-card" style="cursor: default; border-color: var(--primary);">
-          <img id="detailTeamLogo" src="" onerror="this.onerror=null; this.src='https://placehold.co/60x60/e5e7eb/4b5563?text=Logo';" referrerpolicy="no-referrer">
-          <div>
-            <strong id="detailTeamName" style="color: var(--primary); font-size: 20px;">Team Name</strong><br>
-            <span id="detailTeamDiv" style="font-size: 13px; color: #555;">Division</span>
-          </div>
+        <div class="grid-3">
+          <div class="form-group"><label>Team A</label><select id="fixTeamA" required></select></div>
+          <div class="form-group"><label>Team B</label><select id="fixTeamB" required></select></div>
+          <div class="form-group"><label>Venue</label><input type="text" id="fixVenue" required></div>
         </div>
-
-        <h4 style="color: var(--dark-bg); margin-top: 22px; border-bottom: 2px solid var(--primary); padding-bottom:4px;">PLAYERS</h4>
-        <div style="overflow-x:auto;">
-          <table>
-            <thead><tr><th class="main-header-teal">Name</th><th class="main-header-teal" style="width: 80px;">Jersey</th><th class="main-header-teal">Position</th></tr></thead>
-            <tbody id="detailPlayersBody"><tr><td colspan="3">Loading...</td></tr></tbody>
-          </table>
-        </div>
-
-        <h4 style="color: var(--dark-bg); margin-top: 22px; border-bottom: 2px solid var(--primary); padding-bottom:4px;">OFFICIALS</h4>
-        <div style="overflow-x:auto;">
-          <table>
-            <thead><tr><th class="main-header-teal">Name</th><th class="main-header-teal">Role</th></tr></thead>
-            <tbody id="detailOfficialsBody"><tr><td colspan="2">Loading...</td></tr></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- 4. Rules -->
-    <div id="RulesTab" class="tabcontent">
-      <h3 style="color: var(--primary); margin-top: 0;">Tournament Rules & Information</h3>
-      <div id="rulesContainer" class="rules-content" dir="rtl">Loading rules...</div>
-    </div>
-
-    <!-- 5. Team Registration -->
-    <div id="TeamRegistration" class="tabcontent">
-      <h3 style="color: var(--primary); margin-top: 0;">Register a New Team</h3>
-      <div id="teamRegClosedBanner" class="closed-msg" style="display:none;"></div>
-      <div id="teamRegFormWrap">
-        <div id="teamRegMessage" class="message"></div>
-        <form id="teamRegForm" onsubmit="event.preventDefault(); processTeamRegistration();">
-          <div class="form-group"><label>Team Name</label><input type="text" id="teamName" required></div>
+        <div class="grid-3">
           <div class="form-group">
-            <label>Division</label>
-            <select id="teamDivision" required>
-              <option value="Men's">Men's Division</option>
-              <option value="Women's">Women's Division</option>
+            <label>Group / Stage</label>
+            <select id="fixGroup">
+              <option value="">- None / League -</option>
+              <option value="Group A">Group A</option>
+              <option value="Group B">Group B</option>
+              <option value="Group C">Group C</option>
+              <option value="Group D">Group D</option>
+              <option value="Quarter-Final">Quarter-Final</option>
+              <option value="Semi-Final">Semi-Final</option>
+              <option value="3rd Place">3rd Place</option>
+              <option value="Final">Final</option>
             </select>
           </div>
-          <div class="form-group"><label>Captain Name</label><input type="text" id="captainName" required></div>
-          <div class="form-group"><label>Contact Email</label><input type="email" id="teamEmail" required></div>
-          <div class="form-group"><label>Contact Phone</label><input type="text" id="teamPhone" required></div>
-
-          <div class="form-group" style="background: var(--light-accent); padding: 14px; border-radius: 8px;">
-            <label style="color: var(--primary); margin-bottom: 8px;">Team Logo (Choose ONE method)</label>
-            <p style="font-size: 13px; color: #4b5563; margin: 0 0 5px 0;"><strong>Method 1:</strong> Paste a direct image link (Imgur, Google Drive, etc.)</p>
-            <input type="url" id="teamLogoLink" placeholder="https://example.com/logo.png">
-            <p style="font-size: 13px; color: #4b5563; margin: 12px 0 5px 0;"><strong>Method 2:</strong> Upload an image file (Max 3MB)</p>
-            <input type="file" id="teamLogo" accept="image/*">
+          <div class="form-group">
+            <label>Status</label>
+            <select id="fixStatus" required>
+              <option value="Upcoming">Upcoming</option>
+              <option value="Live">Live / In-Progress</option>
+              <option value="Completed">Completed</option>
+            </select>
           </div>
-
-          <button type="submit" class="submit-btn" id="teamSubmitBtn">Register Team</button>
-        </form>
-      </div>
+          <div class="form-group"><label>Result / Score</label><input type="text" id="fixResult" placeholder="e.g. 3 - 1"></div>
+        </div>
+        <button type="submit" class="submit-btn" id="btnSubmitFixture">Save Match</button>
+      </form>
     </div>
 
-    <!-- 6. Submit Players -->
-    <div id="PlayerRegistration" class="tabcontent">
-      <h3 style="color: var(--primary); margin-top: 0;">Submit Roster (Approved Teams Only)</h3>
-      <div id="playerRegClosedBanner" class="closed-msg" style="display:none;"></div>
-      <div id="playerRegFormWrap">
-        <div id="playerRegMessage" class="message"></div>
-        <form id="playerRegForm" onsubmit="event.preventDefault(); submitPlayersRegistration();">
-          <div class="form-group" style="max-width: 400px;"><label>Select Team</label><select id="playerTeamName" required></select></div>
+    <!-- 4. Update Logo Tab -->
+    <div id="UpdateLogoTab" class="tabcontent">
+      <h3 style="color: var(--admin-red); margin-top: 0;">Update a Team's Logo</h3>
+      <div id="updateLogoMsg" class="message"></div>
+      <form id="updateLogoForm" onsubmit="event.preventDefault(); processLogoUpdate();">
+        <div class="form-group"><label>Select Team</label><select id="logoTeamSelect" required></select></div>
+        <div class="form-group" style="background:#f9fafb; padding:14px; border:1px solid #ddd; border-radius:6px;">
+          <label>Method 1: Paste Direct Image Link (Recommended)</label>
+          <input type="url" id="newTeamLogoLink" placeholder="https://i.imgur.com/example.png">
+          <label style="margin-top:12px;">Method 2: Upload Image File (Max 3MB)</label>
+          <input type="file" id="newTeamLogo" accept="image/*">
+        </div>
+        <button type="submit" class="submit-btn" id="btnUpdateTeamLogo">Save Team Logo</button>
+      </form>
+    </div>
 
-          <h4 style="color: var(--dark-bg); margin-top: 20px; border-bottom: 2px solid var(--primary); padding-bottom:4px;">PLAYERS</h4>
-          <p style="font-size: 13px; color: #6b7280;" id="minPlayersNote">Please fill in player details below.</p>
-          <div style="overflow-x:auto;">
-            <table>
-              <thead>
-                <tr><th class="main-header-teal">Player Full Name</th><th class="main-header-teal" style="width: 80px;">Jersey</th><th class="main-header-teal">Position</th><th class="main-header-teal">Phone</th></tr>
-              </thead>
-              <tbody id="playersTableBody"></tbody>
-            </table>
+    <!-- 5. Edit Selected Tournament Settings -->
+    <div id="SettingsTab" class="tabcontent">
+      <h3 style="color: var(--admin-red); margin-top: 0;">Edit Selected Tournament Settings</h3>
+      <div id="settingsMsg" class="message"></div>
+      <form id="settingsForm" onsubmit="event.preventDefault(); processSettingsUpdate();">
+        <div class="grid-3">
+          <div class="form-group" style="grid-column: span 2;"><label>Tournament Name</label><input type="text" id="editName" required></div>
+          <div class="form-group">
+            <label>Status</label>
+            <select id="editStatus">
+              <option value="Active">Active</option>
+              <option value="Upcoming">Upcoming</option>
+              <option value="Archived">Archived</option>
+            </select>
           </div>
-
-          <h4 style="color: var(--dark-bg); margin-top: 20px; border-bottom: 2px solid var(--primary); padding-bottom:4px;">OFFICIALS</h4>
-          <div style="overflow-x:auto;">
-            <table>
-              <thead>
-                <tr><th class="main-header-teal">Official Full Name</th><th class="main-header-teal" style="width: 60px;">-</th><th class="main-header-teal">Role</th><th class="main-header-teal">Phone</th></tr>
-              </thead>
-              <tbody id="officialsTableBody"></tbody>
-            </table>
-          </div>
-
-          <button type="submit" class="submit-btn" id="rosterSubmitBtn">Submit Full Roster</button>
-        </form>
-      </div>
+        </div>
+        <div class="grid-3">
+          <div class="form-group"><label>Registration Deadline</label><input type="datetime-local" id="editDeadline"></div>
+          <div class="form-group"><label>Max Players</label><input type="number" id="editMaxP"></div>
+          <div class="form-group"><label>Max Officials</label><input type="number" id="editMaxO"></div>
+        </div>
+        <div class="form-group">
+          <label>Divisions (Show / Hide Men's or Women's)</label>
+          <select id="editDivisions">
+            <option value="Both">Both (Men's & Women's)</option>
+            <option value="Men's Only">Men's Only (Hide Women's)</option>
+            <option value="Women's Only">Women's Only (Hide Men's)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Tournament Rules (Supports Dhivehi / RTL)</label>
+          <textarea id="editRules" rows="6" dir="rtl"></textarea>
+        </div>
+        <div class="form-group" style="border-top: 1px solid #ddd; padding-top: 12px;">
+          <label>Tournament Logo Link (Recommended)</label>
+          <input type="url" id="editLogoLink" placeholder="https://...">
+          <label style="margin-top:10px;">Or Upload New Logo File</label>
+          <input type="file" id="editLogoFile" accept="image/*">
+        </div>
+        <button type="submit" class="submit-btn" id="btnUpdateSettings">Save Tournament Settings</button>
+      </form>
+    </div>
     </div>
 
     <script>
-      /**
-       * =========================================================================
-       * VERCEL CONNECTION SETTING:
-       * Paste your deployed Client Google Apps Script Web App URL (/exec) below.
-       * Example: "https://script.google.com/macros/s/AKfycbx.../exec"
-       * Leave blank ("") if running directly inside Google Apps Script.
-       * =========================================================================
-       */
-      var API_URL = "";
-
       var allTournaments = [];
-      var selectedSport = 'Volleyball';
-      var currentTournament = null;
-      var activeTabId = 'PointsTableTab';
-      var currentApprovedTeams = [];
-      var PLACEHOLDER_LOGO = 'https://placehold.co/60x60/e5e7eb/4b5563?text=Logo';
+      var selectedTournament = null;
+      var currentTab = 'TournamentsTab';
 
-      /**
-       * Universal Backend Bridge:
-       * 1) Uses fetch() to Google Apps Script API when hosted on Vercel (API_URL set)
-       * 2) Uses google.script.run when hosted inside Google Apps Script
-       * 3) Uses local preview mock data if neither is available
-       */
-      function isInsideGAS() {
-        return (typeof google !== 'undefined' && google.script && google.script.run);
-      }
-
-      function apiGet(action, params, onSuccess, onFailure) {
-        if (API_URL && API_URL.trim() !== "") {
-          var qs = new URLSearchParams(Object.assign({ action: action }, params || {})).toString();
-          fetch(API_URL.trim() + "?" + qs, { method: "GET" })
-            .then(function(res) { return res.json(); })
-            .then(function(json) {
-              if (json && json.ok) { if (onSuccess) onSuccess(json.data); }
-              else { if (onFailure) onFailure(new Error((json && json.error) || "API error")); }
-            })
-            .catch(function(err) { if (onFailure) onFailure(err); });
-          return;
-        }
-
-        if (isInsideGAS()) {
-          var runner = google.script.run
-            .withSuccessHandler(onSuccess || function() {})
-            .withFailureHandler(onFailure || function() {});
-          if (action === "getTournaments") runner.getTournaments();
-          else if (action === "getPointsTable") runner.getPointsTable(params.tournamentId);
-          else if (action === "getFixtures") runner.getFixtures(params.tournamentId);
-          else if (action === "getTeams") runner.getTeams(params.tournamentId);
-          else if (action === "getTeamRoster") runner.getTeamRoster(params.teamName, params.tournamentId);
-          return;
-        }
-
-        // Preview Mock Fallback
-        setTimeout(function() {
-          if (action === "getTournaments") {
-            onSuccess([
-              { id: "VB-2026", sport: "Volleyball", year: "2026", name: "RCI Volleyball Tournament 2026", status: "Active", logo: "", rules: "Volleyball 2026 Official Rules", maxPlayers: 14, maxOfficials: 3, divisions: "Both", isClosed: false },
-              { id: "VB-2025", sport: "Volleyball", year: "2025", name: "RCI Volleyball Tournament 2025", status: "Archived", logo: "", rules: "Volleyball 2025 Archived Rules", maxPlayers: 14, maxOfficials: 3, divisions: "Both", isClosed: true },
-              { id: "FS-2026", sport: "Futsal", year: "2026", name: "RCI Futsal Cup 2026", status: "Active", logo: "", rules: "Futsal 2026 Official Rules", maxPlayers: 12, maxOfficials: 3, divisions: "Men's Only", isClosed: false },
-              { id: "HB-2026", sport: "Handball", year: "2026", name: "RCI Handball Championship 2026", status: "Active", logo: "", rules: "Handball 2026 Official Rules", maxPlayers: 14, maxOfficials: 3, divisions: "Both", isClosed: false }
-            ]);
-          } else if (action === "getPointsTable") {
-            if (params.tournamentId === "FS-2026") {
-              onSuccess([
-                [1, "TEAM ALPHA", 2, 2, 0, 6, 7, 2, 5, 0, 0, 0, "", "Men's", params.tournamentId, "Group A"],
-                [2, "TEAM BETA", 2, 1, 1, 3, 4, 4, 0, 0, 0, 0, "", "Men's", params.tournamentId, "Group A"],
-                [3, "TEAM GAMMA", 2, 0, 2, 0, 1, 6, -5, 0, 0, 0, "", "Men's", params.tournamentId, "Group A"],
-                [1, "TEAM DELTA", 2, 2, 0, 6, 5, 1, 4, 0, 0, 0, "", "Men's", params.tournamentId, "Group B"],
-                [2, "TEAM OMEGA", 2, 1, 1, 3, 3, 3, 0, 0, 0, 0, "", "Men's", params.tournamentId, "Group B"],
-                [3, "TEAM NOVA", 2, 0, 2, 0, 1, 5, -4, 0, 0, 0, "", "Men's", params.tournamentId, "Group B"]
-              ]);
-            } else {
-              onSuccess([
-                [1, "ALI SIYAARU", 3, 3, 0, 9, 9, 1, 8, 0, 0, 120, "", "Men's", params.tournamentId, ""],
-                [2, "TEAM JUMPER'S", 3, 2, 1, 6, 6, 4, 2, 0, 0, 45, "", "Men's", params.tournamentId, ""]
-              ]);
+      if (typeof google === 'undefined' || typeof google.script === 'undefined') {
+        window.google = {
+          script: {
+            run: {
+              withSuccessHandler: function(cb) { this._s = cb; return this; },
+              withFailureHandler: function(cb) { this._f = cb; return this; },
+              verifyAdminPassword: function(pwd) {
+                var self = this;
+                setTimeout(function() { if (self._s) self._s(pwd === "admin123"); }, 100);
+              },
+              getTournaments: function() {
+                var self = this;
+                setTimeout(function() {
+                  if (self._s) self._s([
+                    { row: 2, id: "VB-2026", sport: "Volleyball", year: "2026", name: "RCI Volleyball 2026", status: "Active", deadline: "", logo: "", rules: "", maxPlayers: 14, maxOfficials: 3, divisions: "Both" },
+                    { row: 3, id: "FS-2026", sport: "Futsal", year: "2026", name: "RCI Futsal Cup 2026", status: "Active", deadline: "", logo: "", rules: "", maxPlayers: 12, maxOfficials: 3, divisions: "Men's Only" }
+                  ]);
+                }, 100);
+              },
+              createTournament: function() { var self = this; setTimeout(function() { if (self._s) self._s("Tournament Created (Preview)"); }, 100); },
+              updateTournamentStatus: function() { var self = this; setTimeout(function() { if (self._s) self._s("Status Updated (Preview)"); }, 100); },
+              updateTournamentSettings: function() { var self = this; setTimeout(function() { if (self._s) self._s("Settings Saved (Preview)"); }, 100); },
+              getTeamsForApproval: function() { var self = this; setTimeout(function() { if (self._s) self._s([]); }, 100); },
+              getTeams: function() { var self = this; setTimeout(function() { if (self._s) self._s(["ALI SIYAARU", "TEAM JUMPER'S"]); }, 100); },
+              updateTeamStatus: function() { var self = this; setTimeout(function() { if (self._s) self._s("Updated (Preview)"); }, 100); },
+              updatePointsTable: function() { var self = this; setTimeout(function() { if (self._s) self._s("Standings Saved (Preview)"); }, 100); },
+              addFixture: function() { var self = this; setTimeout(function() { if (self._s) self._s("Match Scheduled (Preview)"); }, 100); },
+              getFixturesForAdmin: function() {
+                var self = this;
+                setTimeout(function() {
+                  if (self._s) self._s([
+                    { row: 2, matchId: "Match 01", date: "2026-11-25", time: "20:00", teamA: "ALI SIYAARU", teamB: "TEAM JUMPER'S", venue: "Main Court", status: "Upcoming", result: "-", group: "Group A" }
+                  ]);
+                }, 100);
+              },
+              updateMatchScore: function() { var self = this; setTimeout(function() { if (self._s) self._s("Score saved & Points Table automatically updated! (Preview)"); }, 100); },
+              recalculatePointsTable: function() { var self = this; setTimeout(function() { if (self._s) self._s("Points Table recalculated automatically! (Preview)"); }, 100); },
+              updateTeamLogo: function() { var self = this; setTimeout(function() { if (self._s) self._s("Logo Saved (Preview)"); }, 100); }
             }
-          } else if (action === "getFixtures") {
-            onSuccess([
-              ["M01", "2026-11-25", "20:00", "TEAM ALPHA", "TEAM BETA", "Main Court", "Upcoming", "-", params.tournamentId, "Group A"],
-              ["M02", "2026-11-25", "21:00", "TEAM DELTA", "TEAM OMEGA", "Main Court", "Upcoming", "-", params.tournamentId, "Group B"]
-            ]);
-          } else if (action === "getTeams") {
-            onSuccess([
-              { name: "ALI SIYAARU", logo: "", division: "Men's", group: "Group A" },
-              { name: "TEAM JUMPER'S", logo: "", division: "Men's", group: "Group B" }
-            ]);
-          } else if (action === "getTeamRoster") {
-            onSuccess([
-              { name: "Mohamed Faruhad", jersey: "12", position: "Player", phone: "7771234" },
-              { name: "Ahmed Coach", jersey: "N/A", position: "Coach", phone: "7775678" }
-            ]);
           }
-        }, 120);
-      }
-
-      function apiPost(action, payload, onSuccess, onFailure) {
-        if (API_URL && API_URL.trim() !== "https://script.google.com/macros/s/AKfycbyPlb6wuTkEb5-T33R36d2dpQ8sasVzNhI4czJNH4GEJimVhDTUf7mpuJdSz9Hssm6O/exec") {
-          // text/plain avoids CORS preflight OPTIONS request on Google Apps Script
-          fetch(API_URL.trim(), {
-            method: "POST",
-            headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify({ action: action, payload: payload })
-          })
-            .then(function(res) { return res.json(); })
-            .then(function(json) {
-              if (json && json.ok) { if (onSuccess) onSuccess(json.data); }
-              else { if (onFailure) onFailure(new Error((json && json.error) || "API error")); }
-            })
-            .catch(function(err) { if (onFailure) onFailure(err); });
-          return;
-        }
-
-        if (isInsideGAS()) {
-          var runner = google.script.run
-            .withSuccessHandler(onSuccess || function() {})
-            .withFailureHandler(onFailure || function() {});
-          if (action === "registerTeam") runner.registerTeam(payload);
-          else if (action === "registerPlayers") runner.registerPlayers(payload);
-          return;
-        }
-
-        setTimeout(function() {
-          if (action === "registerTeam") onSuccess("Team Registered (Preview Mode - Set API_URL for live Vercel)");
-          else if (action === "registerPlayers") onSuccess("Roster Submitted (Preview Mode - Set API_URL for live Vercel)");
-        }, 150);
-      }
-
-      function fixImageLink(url) {
-        if (!url || typeof url !== 'string') return "";
-        var trimmed = url.trim();
-        if (trimmed === "" || trimmed.includes("No Logo") || trimmed.includes("Error")) return "";
-        if (trimmed.indexOf("data:image/") === 0) return trimmed;
-        var fileMatch = trimmed.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-        if (fileMatch && fileMatch[1]) return "https://lh3.googleusercontent.com/d/" + fileMatch[1];
-        if (trimmed.includes("drive.google.com")) {
-          var match = trimmed.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-          if (match && match[1]) return "https://lh3.googleusercontent.com/d/" + match[1];
-        }
-        return trimmed;
+        };
       }
 
       window.onload = function() {
-        document.getElementById("defaultOpen").click();
-        apiGet("getTournaments", {}, function(list) {
-          allTournaments = list || [];
-          var firstActive = allTournaments.find(function(t) { return t.status.toLowerCase() === 'active'; }) || allTournaments[0];
-          if (firstActive) {
-            selectedSport = firstActive.sport;
-            updateSportPillsUI();
-          }
-          populateTournamentDropdown();
-        }, function(err) {
-          var banner = document.getElementById('globalErrorBanner');
-          banner.innerText = "⚠️ Error connecting to Google Sheets: " + err.message;
-          banner.style.display = "block";
-        });
+        var pwdInput = document.getElementById('adminPasswordInput');
+        if (pwdInput) pwdInput.focus();
       };
 
-      function updateSportPillsUI() {
-        var pills = document.querySelectorAll('.sport-pill');
-        pills.forEach(function(p) {
-          if (p.innerText.toLowerCase().includes(selectedSport.toLowerCase())) {
-            p.classList.add('active');
-          } else {
-            p.classList.remove('active');
-          }
-        });
+      function submitAdminLogin() {
+        var pwd = document.getElementById('adminPasswordInput').value;
+        var btn = document.getElementById('btnAdminLogin');
+        var errEl = document.getElementById('adminLoginError');
+        errEl.style.display = "none";
+        btn.disabled = true;
+        btn.innerText = "Checking...";
+
+        google.script.run
+          .withSuccessHandler(function(isValid) {
+            btn.disabled = false;
+            btn.innerText = "Unlock Admin Panel";
+            if (isValid) {
+              document.getElementById('adminLoginOverlay').style.display = "none";
+              document.getElementById('adminMainContent').style.display = "block";
+              document.getElementById('adminPasswordInput').value = "";
+              document.getElementById("defaultOpen").click();
+              loadTournamentsList();
+            } else {
+              errEl.innerText = "Incorrect password. Please try again.";
+              errEl.style.display = "block";
+            }
+          })
+          .withFailureHandler(function(err) {
+            btn.disabled = false;
+            btn.innerText = "Unlock Admin Panel";
+            errEl.innerText = "Error: " + err.message;
+            errEl.style.display = "block";
+          })
+          .verifyAdminPassword(pwd);
       }
 
-      function selectSport(sport, btnEl) {
-        selectedSport = sport;
-        document.querySelectorAll('.sport-pill').forEach(function(b) { b.classList.remove('active'); });
-        if (btnEl) btnEl.classList.add('active');
-        populateTournamentDropdown();
+      function lockAdminPanel() {
+        document.getElementById('adminMainContent').style.display = "none";
+        document.getElementById('adminLoginOverlay').style.display = "block";
+        document.getElementById('adminLoginError').style.display = "none";
+        document.getElementById('adminPasswordInput').value = "";
+        document.getElementById('adminPasswordInput').focus();
       }
 
-      function populateTournamentDropdown() {
-        var select = document.getElementById('tournamentSelect');
-        var matching = allTournaments.filter(function(t) {
-          return t.sport.toLowerCase() === selectedSport.toLowerCase();
-        });
-
-        if (matching.length === 0) {
-          select.innerHTML = '<option value="">No ' + selectedSport + ' tournaments yet</option>';
-          currentTournament = null;
-          applyTournamentUI();
-          return;
-        }
-
-        var html = '';
-        matching.forEach(function(t) {
-          var statusTag = t.status.toLowerCase() === 'archived' ? ' (Archived)' : (t.status.toLowerCase() === 'active' ? ' (Active)' : ' (' + t.status + ')');
-          html += '<option value="' + t.id + '">' + t.year + ' - ' + t.name + statusTag + '</option>';
-        });
-        select.innerHTML = html;
-        onTournamentChange();
+      function showMessage(elementId, text) {
+        var el = document.getElementById(elementId);
+        el.innerText = text;
+        el.style.display = "block";
+        var isErr = String(text).includes("Error");
+        el.style.backgroundColor = isErr ? "#fef2f2" : "var(--admin-light)";
+        el.style.color = isErr ? "#dc2626" : "var(--admin-red)";
       }
 
-      function onTournamentChange() {
-        var tid = document.getElementById('tournamentSelect').value;
-        currentTournament = allTournaments.find(function(t) { return t.id === tid; }) || null;
-        applyTournamentUI();
-      }
-
-      function applyTournamentUI() {
-        var titleEl = document.getElementById('tournamentTitle');
-        var metaEl = document.getElementById('tournamentMeta');
-        var logoEl = document.getElementById('mainTournLogo');
-        var rulesEl = document.getElementById('rulesContainer');
-
-        if (!currentTournament) {
-          titleEl.innerText = selectedSport + " Portal";
-          metaEl.innerHTML = "No tournament found for this sport. Admin can add one in the Admin Panel.";
-          logoEl.style.display = "none";
-          rulesEl.innerText = "No rules available.";
-          document.getElementById('pointsTableContainer').innerHTML = '<div style="text-align:center; padding:20px;">No tournament selected.</div>';
-          document.getElementById('fixturesTableBody').innerHTML = '<tr><td colspan="6" style="text-align:center;">No tournament selected.</td></tr>';
-          document.getElementById('approvedTeamsDirectory').innerHTML = '<p style="text-align:center; grid-column:1/-1;">No tournament selected.</p>';
-          toggleRegistrationClosed(true, "No active tournament available for registration.");
-          return;
-        }
-
-        titleEl.innerText = currentTournament.name;
-        document.title = currentTournament.name;
-
-        var statusClass = currentTournament.status.toLowerCase() === 'active' ? 'status-active' : (currentTournament.status.toLowerCase() === 'archived' ? 'status-archived' : 'status-upcoming');
-        metaEl.innerHTML = '<span>' + currentTournament.sport + ' • Season ' + currentTournament.year + '</span> <span class="status-pill ' + statusClass + '">' + currentTournament.status + '</span>';
-
-        var safeLogo = fixImageLink(currentTournament.logo);
-        if (safeLogo) { logoEl.src = safeLogo; logoEl.style.display = "block"; }
-        else { logoEl.style.display = "none"; }
-
-        rulesEl.innerText = currentTournament.rules || "No rules have been added for this tournament yet.";
-
-        // Adapt Team Registration division dropdown to tournament's active divisions
-        var divSelect = document.getElementById('teamDivision');
-        if (divSelect) {
-          var vis = getDivisionVisibility(currentTournament.divisions);
-          if (vis.showMens && !vis.showWomens) {
-            divSelect.innerHTML = '<option value="Men\'s">Men\'s Division</option>';
-          } else if (!vis.showMens && vis.showWomens) {
-            divSelect.innerHTML = '<option value="Women\'s">Women\'s Division</option>';
-          } else {
-            divSelect.innerHTML = '<option value="Men\'s">Men\'s Division</option><option value="Women\'s">Women\'s Division</option>';
-          }
-        }
-
-        if (currentTournament.isClosed) {
-          var msg = currentTournament.status.toLowerCase() === 'archived'
-            ? "📦 This is an archived tournament (" + currentTournament.year + "). Registration is closed, but you can still view all teams, rosters, schedule, and final standings."
-            : "⚠️ Registration for " + currentTournament.name + " is currently closed.";
-          toggleRegistrationClosed(true, msg);
-        } else {
-          toggleRegistrationClosed(false, "");
-          buildRosterForms();
-        }
-
-        if (activeTabId === 'PointsTableTab') loadPointsTable();
-        else if (activeTabId === 'FixturesTab') loadFixtures();
-        else if (activeTabId === 'TeamsTab') loadApprovedTeams();
-        else if (activeTabId === 'PlayerRegistration') loadTeamDropdown();
-      }
-
-      function toggleRegistrationClosed(isClosed, message) {
-        document.getElementById('teamRegClosedBanner').style.display = isClosed ? 'block' : 'none';
-        document.getElementById('teamRegClosedBanner').innerText = message;
-        document.getElementById('teamRegFormWrap').style.display = isClosed ? 'none' : 'block';
-
-        document.getElementById('playerRegClosedBanner').style.display = isClosed ? 'block' : 'none';
-        document.getElementById('playerRegClosedBanner').innerText = message;
-        document.getElementById('playerRegFormWrap').style.display = isClosed ? 'none' : 'block';
-      }
-
-      function getPositionsForSport(sport) {
-        var s = (sport || "").toLowerCase();
-        if (s === 'futsal') return ['Goalkeeper', 'Defender', 'Winger', 'Pivot', 'Player'];
-        if (s === 'handball') return ['Goalkeeper', 'Left Wing', 'Right Wing', 'Backcourt', 'Center Back', 'Pivot', 'Player'];
-        return ['Player', 'Setter', 'Libero', 'Spiker', 'Blocker'];
-      }
-
-      function buildRosterForms() {
-        var pBody = document.getElementById('playersTableBody');
-        var oBody = document.getElementById('officialsTableBody');
-        if (!pBody || !oBody || !currentTournament) return;
-
-        var maxP = Math.max(5, parseInt(currentTournament.maxPlayers) || 14);
-        var maxO = parseInt(currentTournament.maxOfficials) || 3;
-        var positions = getPositionsForSport(currentTournament.sport);
-        var posOptions = '<option value="">Select</option>' + positions.map(function(p) { return '<option value="' + p + '">' + p + '</option>'; }).join('');
-
-        var minReq = currentTournament.sport.toLowerCase() === 'futsal' ? 5 : 7;
-        document.getElementById('minPlayersNote').innerText = 'Up to ' + maxP + ' players allowed (First ' + minReq + ' recommended).';
-
-        pBody.innerHTML = "";
-        for (var i = 0; i < maxP; i++) {
-          pBody.innerHTML += '<tr>' +
-            '<td><input type="text" class="m-name" placeholder="Player ' + (i + 1) + ' Name"></td>' +
-            '<td><input type="number" class="m-jersey" placeholder="#"></td>' +
-            '<td><select class="m-position">' + posOptions + '</select></td>' +
-            '<td><input type="text" class="m-phone" placeholder="Phone"></td>' +
-          '</tr>';
-        }
-
-        oBody.innerHTML = "";
-        for (var j = 0; j < maxO; j++) {
-          oBody.innerHTML += '<tr>' +
-            '<td><input type="text" class="m-name" placeholder="Official ' + (j + 1) + ' Name"></td>' +
-            '<td><input type="hidden" class="m-jersey" value="N/A">-</td>' +
-            '<td><select class="m-position"><option value="">Select Role</option><option value="Manager">Manager</option><option value="Coach">Coach</option><option value="Assistant Coach">Assistant Coach</option><option value="Medic">Medic</option><option value="Official">Official</option></select></td>' +
-            '<td><input type="text" class="m-phone" placeholder="Phone"></td>' +
-          '</tr>';
-        }
+      function showError(err) {
+        var el = document.getElementById('globalErrorBanner');
+        el.innerText = "⚠️ Backend Error: " + err.message;
+        el.style.display = "block";
+        document.querySelectorAll('.submit-btn').forEach(function(b) { b.disabled = false; });
       }
 
       function openTab(evt, tabName) {
-        activeTabId = tabName;
+        currentTab = tabName;
         var tabcontent = document.getElementsByClassName("tabcontent");
         for (var i = 0; i < tabcontent.length; i++) { tabcontent[i].style.display = "none"; }
         var tablinks = document.getElementsByClassName("tablinks");
         for (var j = 0; j < tablinks.length; j++) { tablinks[j].className = tablinks[j].className.replace(" active", ""); }
         document.getElementById(tabName).style.display = "block";
         evt.currentTarget.className += " active";
-
         var msgs = document.getElementsByClassName("message");
         for (var k = 0; k < msgs.length; k++) { msgs[k].style.display = "none"; }
       }
 
-      function showMessage(elementId, text, isError) {
-        var el = document.getElementById(elementId);
-        el.innerText = text;
-        el.style.display = "block";
-        el.style.color = isError ? "#b91c1c" : "var(--primary)";
-        el.style.backgroundColor = isError ? "#fef2f2" : "var(--light-accent)";
-      }
-
-      function getStatusBadge(status) {
-        var s = (status || "").toLowerCase();
-        if (s.includes("completed") || s.includes("final")) return '<span class="badge bg-completed">' + status + '</span>';
-        if (s.includes("live") || s.includes("progress")) return '<span class="badge bg-live">' + status + '</span>';
-        return '<span class="badge bg-upcoming">' + (status || "Upcoming") + '</span>';
-      }
-
-      function getGroupBadgeHtml(group) {
-        var g = String(group || "").trim();
-        if (!g) return "";
-        var gl = g.toLowerCase();
-        var cls = "group-badge";
-        if (gl.indexOf("group b") > -1 || gl.indexOf("group d") > -1) cls += " group-b";
-        else if (gl.indexOf("final") > -1 || gl.indexOf("3rd") > -1 || gl.indexOf("knockout") > -1) cls += " group-ko";
-        return '<span class="' + cls + '">' + g + '</span>';
-      }
-
-      function getDivisionVisibility(divSetting) {
-        var d = String(divSetting || "Both").trim().toLowerCase().replace(/[’']/g, "'");
-        var isMensOnly = (d.indexOf("men") > -1 && d.indexOf("women") === -1 && d.indexOf("both") === -1);
-        var isWomensOnly = (d.indexOf("women") > -1 && d.indexOf("both") === -1);
-        return {
-          showMens: !isWomensOnly,
-          showWomens: !isMensOnly
-        };
-      }
-
-      function loadTeamDropdown() {
-        var select = document.getElementById('playerTeamName');
-        if (!select || !currentTournament) return;
-        select.innerHTML = '<option value="">Loading approved teams...</option>';
-        apiGet("getTeams", { tournamentId: currentTournament.id }, function(teams) {
-          if (!teams || teams.length === 0) {
-            select.innerHTML = '<option value="">No approved teams yet</option>';
-            return;
-          }
-          select.innerHTML = '<option value="">Select Approved Team</option>' +
-            teams.map(function(t) {
-              var safe = String(t.name || "").replace(/"/g, '&quot;');
-              return '<option value="' + safe + '">' + t.name + '</option>';
-            }).join('');
-        }, function(err) {
-          select.innerHTML = '<option value="">Error loading teams</option>';
-        });
-      }
-
-      function loadApprovedTeams() {
-        document.getElementById('teamDirectoryView').style.display = "block";
-        document.getElementById('teamDetailView').style.display = "none";
-        if (!currentTournament) return;
-
-        var directory = document.getElementById('approvedTeamsDirectory');
-        directory.innerHTML = '<div style="text-align:center; grid-column: 1 / -1;">Loading teams...</div>';
-
-        apiGet("getTeams", { tournamentId: currentTournament.id }, function(teams) {
-          if (!teams || teams.length === 0) {
-            currentApprovedTeams = [];
-            directory.innerHTML = "<p style='text-align:center; grid-column: 1 / -1; color:#6b7280;'>No approved teams in this tournament yet.</p>";
-            return;
-          }
-          currentApprovedTeams = teams.map(function(t, idx) {
-            return { name: t.name, logo: t.logo, division: t.division, group: t.group || "", _idx: idx };
-          });
-          var vis = getDivisionVisibility(currentTournament.divisions);
-          var showMens = vis.showMens;
-          var showWomens = vis.showWomens;
-
-          var mensTeams = currentApprovedTeams.filter(function(t) { return !t.division.toLowerCase().includes("women"); });
-          var womensTeams = currentApprovedTeams.filter(function(t) { return t.division.toLowerCase().includes("women"); });
-          var dirHtml = "";
-
-          function renderTeamCards(title, list) {
-            if (list.length === 0) return "";
-            var html = '<h4 style="grid-column: 1 / -1; color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 5px; margin: 10px 0 4px 0;">' + title + '</h4>';
-            list.forEach(function(team) {
-              var logoSrc = fixImageLink(team.logo) || PLACEHOLDER_LOGO;
-              var gBadge = team.group ? ' ' + getGroupBadgeHtml(team.group) : '';
-              html += '<div class="team-card" onclick="viewTeamRosterByIndex(' + team._idx + ')">' +
-                '<img src="' + logoSrc + '" onerror="this.onerror=null; this.src=\'' + PLACEHOLDER_LOGO + '\';" referrerpolicy="no-referrer">' +
-                '<div><strong style="color: var(--primary); font-size: 15px;">' + team.name + '</strong><br><span style="font-size: 12px; color: #6b7280;">' + team.division + '</span>' + gBadge + '</div>' +
-              '</div>';
+      function loadTournamentsList() {
+        google.script.run
+          .withSuccessHandler(function(list) {
+            allTournaments = list || [];
+            var select = document.getElementById('adminTournamentSelect');
+            var prevId = select.value;
+            var opts = '';
+            allTournaments.forEach(function(t) {
+              opts += '<option value="' + t.id + '">' + t.year + ' | ' + t.sport + ' - ' + t.name + ' (' + t.status + ')</option>';
             });
-            return html;
-          }
-
-          if (showMens) dirHtml += renderTeamCards("Men's Division", mensTeams);
-          if (showWomens) dirHtml += renderTeamCards("Women's Division", womensTeams);
-          directory.innerHTML = dirHtml || "<p style='text-align:center; grid-column: 1 / -1; color:#6b7280;'>No approved teams in this tournament yet.</p>";
-        }, function(err) {
-          directory.innerHTML = "<p style='text-align:center; grid-column: 1 / -1; color:#b91c1c;'>Error loading teams: " + err.message + "</p>";
-        });
-      }
-
-      function viewTeamRosterByIndex(idx) {
-        var team = currentApprovedTeams[idx];
-        if (!team) return;
-        var teamName = team.name;
-        var logoUrl = fixImageLink(team.logo) || PLACEHOLDER_LOGO;
-        var division = team.division;
-
-        document.getElementById('teamDirectoryView').style.display = "none";
-        document.getElementById('teamDetailView').style.display = "block";
-        document.getElementById('detailTeamName').innerText = teamName;
-        document.getElementById('detailTeamDiv').innerText = division + " • " + (currentTournament ? currentTournament.name : "");
-        document.getElementById('detailTeamLogo').src = logoUrl;
-
-        document.getElementById('detailPlayersBody').innerHTML = '<tr><td colspan="3">Loading roster...</td></tr>';
-        document.getElementById('detailOfficialsBody').innerHTML = '<tr><td colspan="2">Loading officials...</td></tr>';
-
-        apiGet("getTeamRoster", {
-          teamName: teamName,
-          tournamentId: currentTournament ? currentTournament.id : ""
-        }, function(roster) {
-          var pHtml = "", oHtml = "";
-          var officialsRoles = ["manager", "coach", "assistant coach", "medic", "official"];
-
-          (roster || []).forEach(function(person) {
-            var posLower = String(person.position || "").trim().toLowerCase();
-            if (officialsRoles.includes(posLower)) {
-              oHtml += '<tr><td><strong>' + person.name + '</strong></td><td>' + person.position + '</td></tr>';
-            } else {
-              pHtml += '<tr><td><strong>' + person.name + '</strong></td><td>' + (person.jersey || '-') + '</td><td>' + (person.position || 'Player') + '</td></tr>';
+            select.innerHTML = opts || '<option value="">No tournaments yet</option>';
+            if (prevId && allTournaments.some(function(t) { return t.id === prevId; })) {
+              select.value = prevId;
             }
-          });
+            onAdminTournamentChange();
 
-          document.getElementById('detailPlayersBody').innerHTML = pHtml !== "" ? pHtml : '<tr><td colspan="3">No players registered yet.</td></tr>';
-          document.getElementById('detailOfficialsBody').innerHTML = oHtml !== "" ? oHtml : '<tr><td colspan="2">No officials registered yet.</td></tr>';
-        }, function(error) {
-          document.getElementById('detailPlayersBody').innerHTML = '<tr><td colspan="3" style="color:#dc3545;">Error: ' + error.message + '</td></tr>';
-        });
-      }
-
-      function showTeamDirectory() {
-        document.getElementById('teamDetailView').style.display = "none";
-        document.getElementById('teamDirectoryView').style.display = "block";
-      }
-
-      function loadPointsTable() {
-        if (!currentTournament) return;
-        document.getElementById('pointsTableContainer').innerHTML = '<div style="text-align:center; padding:20px;">Loading standings...</div>';
-        var isVolleyball = currentTournament.sport.toLowerCase() === 'volleyball';
-
-        apiGet("getPointsTable", { tournamentId: currentTournament.id }, function(data) {
-          var rowsData = data || [];
-          var mens = rowsData.filter(function(r) { return !String(r[13] || "").toLowerCase().includes("women"); });
-          var womens = rowsData.filter(function(r) { return String(r[13] || "").toLowerCase().includes("women"); });
-
-          function buildVolleyballRows(rows) {
-            if (rows.length === 0) return '<tr><td colspan="12" style="text-align:center;">No standings data yet.</td></tr>';
-            return rows.map(function(row, idx) {
-              var logoSrc = fixImageLink(row[12]) || PLACEHOLDER_LOGO;
-              return '<tr>' +
-                '<td><div class="rank-circle">' + (idx + 1) + '</div></td>' +
-                '<td><div class="team-cell"><img src="' + logoSrc + '" onerror="this.onerror=null; this.src=\'' + PLACEHOLDER_LOGO + '\';" class="team-logo" referrerpolicy="no-referrer"><span>' + (row[1] || 'TBA') + '</span></div></td>' +
-                '<td>' + (row[2] || '0') + '</td><td>' + (row[3] || '0') + '</td><td>' + (row[4] || '0') + '</td><td><strong>' + (row[5] || '0') + '</strong></td>' +
-                '<td>' + (row[6] || '0') + '</td><td>' + (row[7] || '0') + '</td><td>' + (row[8] || '0') + '</td>' +
-                '<td>' + (row[9] || '0') + '</td><td>' + (row[10] || '0') + '</td><td>' + (row[11] || '0') + '</td>' +
-              '</tr>';
-            }).join('');
-          }
-
-          function buildGoalSportRows(rows) {
-            if (rows.length === 0) return '<tr><td colspan="10" style="text-align:center;">No standings data yet.</td></tr>';
-            return rows.map(function(row, idx) {
-              var logoSrc = fixImageLink(row[12]) || PLACEHOLDER_LOGO;
-              return '<tr>' +
-                '<td><div class="rank-circle">' + (idx + 1) + '</div></td>' +
-                '<td><div class="team-cell"><img src="' + logoSrc + '" onerror="this.onerror=null; this.src=\'' + PLACEHOLDER_LOGO + '\';" class="team-logo" referrerpolicy="no-referrer"><span>' + (row[1] || 'TBA') + '</span></div></td>' +
-                '<td>' + (row[2] || '0') + '</td>' +
-                '<td>' + (row[3] || '0') + '</td>' +
-                '<td>' + (row[9] || '0') + '</td>' +
-                '<td>' + (row[4] || '0') + '</td>' +
-                '<td>' + (row[6] || '0') + '</td>' +
-                '<td>' + (row[7] || '0') + '</td>' +
-                '<td>' + (row[8] || '0') + '</td>' +
-                '<td><strong>' + (row[5] || '0') + '</strong></td>' +
-              '</tr>';
-            }).join('');
-          }
-
-          function renderDivisionTable(title, rows) {
-            if (isVolleyball) {
-              return '<h3 style="color: var(--primary); margin-top: 20px; text-align: center; text-transform: uppercase;">' + title + '</h3>' +
-                '<div style="overflow-x:auto;"><table><thead><tr>' +
-                  '<th rowspan="2" class="main-header-dark" style="width: 45px;">#</th>' +
-                  '<th rowspan="2" class="main-header-teal" style="text-align: left; padding-left: 12px;">TEAM</th>' +
-                  '<th colspan="4" class="main-header-dark">MATCHES</th>' +
-                  '<th colspan="3" class="main-header-teal">SETS</th>' +
-                  '<th colspan="3" class="main-header-dark">POINTS</th>' +
-                '</tr><tr>' +
-                  '<th class="sub-th-dark">PLD</th><th class="sub-th-dark">W</th><th class="sub-th-dark">L</th><th class="sub-th-dark">PTS</th>' +
-                  '<th class="sub-th">W</th><th class="sub-th">L</th><th class="sub-th">+/-</th>' +
-                  '<th class="sub-th-dark">W</th><th class="sub-th-dark">L</th><th class="sub-th-dark">+/-</th>' +
-                '</tr></thead><tbody>' + buildVolleyballRows(rows) + '</tbody></table></div>';
-            } else {
-              return '<h3 style="color: var(--primary); margin-top: 20px; text-align: center; text-transform: uppercase;">' + title + '</h3>' +
-                '<div style="overflow-x:auto;"><table><thead><tr>' +
-                  '<th class="main-header-dark" style="width: 45px;">#</th>' +
-                  '<th class="main-header-teal" style="text-align: left; padding-left: 12px;">TEAM</th>' +
-                  '<th class="main-header-dark">PLD</th><th class="main-header-dark">W</th><th class="main-header-dark">D</th><th class="main-header-dark">L</th>' +
-                  '<th class="main-header-teal">GF</th><th class="main-header-teal">GA</th><th class="main-header-teal">GD</th>' +
-                  '<th class="main-header-dark">PTS</th>' +
-                '</tr></thead><tbody>' + buildGoalSportRows(rows) + '</tbody></table></div>';
-            }
-          }
-
-          function renderDivisionWithGroups(divTitle, divRows, singleDivisionMode) {
-            var grouped = {};
-            var hasGroups = false;
-            divRows.forEach(function(r) {
-              var g = String(r[15] || "").trim();
-              if (g) hasGroups = true;
-              var key = g || "Unassigned";
-              if (!grouped[key]) grouped[key] = [];
-              grouped[key].push(r);
-            });
-
-            if (!hasGroups) {
-              return renderDivisionTable(divTitle, divRows);
-            }
-
-            var groupNames = Object.keys(grouped).sort(function(a, b) {
-              if (a === "Unassigned") return 1;
-              if (b === "Unassigned") return -1;
-              return a.localeCompare(b);
-            });
-
-            return groupNames.map(function(gName) {
-              var tableTitle = singleDivisionMode ? gName : (divTitle + " — " + gName);
-              return renderDivisionTable(tableTitle, grouped[gName]);
-            }).join('');
-          }
-
-          var vis = getDivisionVisibility(currentTournament.divisions);
-          var showMens = vis.showMens && (mens.length > 0 || (!vis.showWomens && womens.length === 0));
-          var showWomens = vis.showWomens && (womens.length > 0 || (!vis.showMens && mens.length === 0));
-          var singleDiv = !(showMens && showWomens);
-          var finalHtml = "";
-
-          if (showMens) finalHtml += renderDivisionWithGroups("Men's Division", mens, singleDiv);
-          if (showWomens) finalHtml += renderDivisionWithGroups("Women's Division", womens, singleDiv);
-
-          document.getElementById('pointsTableContainer').innerHTML = finalHtml || '<div style="text-align:center; padding:20px;">No standings data yet.</div>';
-        }, function(err) {
-          document.getElementById('pointsTableContainer').innerHTML = '<div style="text-align:center; padding:20px; color:#b91c1c;">Error loading standings: ' + err.message + '</div>';
-        });
-      }
-
-      function loadFixtures() {
-        if (!currentTournament) return;
-        document.getElementById('fixturesTableBody').innerHTML = '<tr><td colspan="6" style="text-align:center;">Loading schedule...</td></tr>';
-
-        apiGet("getTeams", { tournamentId: currentTournament.id }, function(teams) {
-          var teamLogos = {};
-          (teams || []).forEach(function(t) {
-            teamLogos[t.name] = fixImageLink(t.logo) || PLACEHOLDER_LOGO;
-          });
-
-          apiGet("getFixtures", { tournamentId: currentTournament.id }, function(data) {
-            var tbody = document.getElementById('fixturesTableBody');
-            if (!data || data.length === 0) {
-              tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No matches scheduled for this tournament yet.</td></tr>';
+            // Render table
+            var tbody = document.getElementById('tournamentsTableBody');
+            if (allTournaments.length === 0) {
+              tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No tournaments created yet.</td></tr>';
               return;
             }
-            var html = '';
-            data.forEach(function(row) {
-              var logoA = teamLogos[row[3]] || PLACEHOLDER_LOGO;
-              var logoB = teamLogos[row[4]] || PLACEHOLDER_LOGO;
-
-              var teamA_html = '<div style="display:flex; align-items:center; justify-content:flex-end; gap:8px;"><strong>' + (row[3] || 'TBA') + '</strong><img src="' + logoA + '" onerror="this.onerror=null; this.src=\'' + PLACEHOLDER_LOGO + '\';" style="width:28px; height:28px; border-radius:50%; object-fit:cover; background:#eee;" referrerpolicy="no-referrer"></div>';
-              var teamB_html = '<div style="display:flex; align-items:center; justify-content:flex-start; gap:8px;"><img src="' + logoB + '" onerror="this.onerror=null; this.src=\'' + PLACEHOLDER_LOGO + '\';" style="width:28px; height:28px; border-radius:50%; object-fit:cover; background:#eee;" referrerpolicy="no-referrer"><strong>' + (row[4] || 'TBA') + '</strong></div>';
-              var groupBadge = row[9] ? '<br>' + getGroupBadgeHtml(row[9]) : '';
-
-              html += '<tr>' +
-                '<td><strong>' + (row[0] || '-') + '</strong>' + groupBadge + '</td>' +
-                '<td>' + (row[1] || '') + '<br><span style="color:#6b7280; font-size:12px;">' + (row[2] || '') + '</span></td>' +
-                '<td><div style="display:grid; grid-template-columns: 1fr auto 1fr; gap: 12px; align-items: center; min-width: 240px;">' +
-                  teamA_html + ' <span style="color:#9ca3af; font-size:11px; font-weight:bold;">VS</span> ' + teamB_html +
-                '</div></td>' +
-                '<td>' + (row[5] || 'TBA') + '</td>' +
-                '<td>' + getStatusBadge(row[6]) + '</td>' +
-                '<td><strong>' + (row[7] || '-') + '</strong></td>' +
+            tbody.innerHTML = allTournaments.map(function(t) {
+              return '<tr>' +
+                '<td><strong>' + t.year + '</strong></td>' +
+                '<td>' + t.sport + '</td>' +
+                '<td>' + t.name + '</td>' +
+                '<td><select id="tStatus_' + t.row + '" class="status-select">' +
+                  '<option value="Active" ' + (t.status === 'Active' ? 'selected' : '') + '>Active</option>' +
+                  '<option value="Upcoming" ' + (t.status === 'Upcoming' ? 'selected' : '') + '>Upcoming</option>' +
+                  '<option value="Archived" ' + (t.status === 'Archived' ? 'selected' : '') + '>Archived</option>' +
+                '</select></td>' +
+                '<td><button class="status-btn" onclick="saveTournamentStatus(' + t.row + ')">Save</button></td>' +
               '</tr>';
-            });
-            tbody.innerHTML = html;
-          }, function(err) {
-            document.getElementById('fixturesTableBody').innerHTML = '<tr><td colspan="6" style="text-align:center; color:#b91c1c;">Error: ' + err.message + '</td></tr>';
-          });
-        });
+            }).join('');
+          })
+          .withFailureHandler(showError)
+          .getTournaments();
       }
 
-      function compressLogoImage(file, callback) {
-        var reader = new FileReader();
-        reader.onload = function(e) {
-          var img = new Image();
-          img.onload = function() {
-            var canvas = document.createElement('canvas');
-            var maxSize = 180;
-            var w = img.width;
-            var h = img.height;
-            if (w > h) {
-              if (w > maxSize) { h = Math.round(h * maxSize / w); w = maxSize; }
-            } else {
-              if (h > maxSize) { w = Math.round(w * maxSize / h); h = maxSize; }
-            }
-            canvas.width = w;
-            canvas.height = h;
-            var ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, w, h);
+      function onAdminTournamentChange() {
+        var tid = document.getElementById('adminTournamentSelect').value;
+        selectedTournament = allTournaments.find(function(t) { return t.id === tid; }) || null;
+        adaptStandingsFormToSport();
+        if (currentTab === 'ApprovalsTab') loadApprovals();
+        if (currentTab === 'UpdatePointsTab' || currentTab === 'AddFixtureTab' || currentTab === 'UpdateLogoTab') loadTeams();
+        if (currentTab === 'AddFixtureTab') loadAdminFixtures();
+        if (currentTab === 'SettingsTab') populateSettingsForm();
+      }
 
-            var dataUrl = canvas.toDataURL('image/webp', 0.8);
-            if (!dataUrl || dataUrl.indexOf('data:image/webp') !== 0 || dataUrl.length > 40000) {
-              dataUrl = canvas.toDataURL('image/png');
-            }
-            if (dataUrl.length > 40000) {
-              ctx.globalCompositeOperation = 'destination-over';
-              ctx.fillStyle = '#ffffff';
-              ctx.fillRect(0, 0, w, h);
-              dataUrl = canvas.toDataURL('image/jpeg', 0.75);
-            }
-            callback(e.target.result.split(',')[1], file.type, file.name, dataUrl);
-          };
-          img.onerror = function() {
-            callback(e.target.result.split(',')[1], file.type, file.name, "");
-          };
-          img.src = e.target.result;
+      function adaptStandingsFormToSport() {
+        var isVolleyball = !selectedTournament || selectedTournament.sport.toLowerCase() === 'volleyball';
+        var drawWrap = document.getElementById('drawFieldWrap');
+        var vbWrap = document.getElementById('volleyballPointsWrap');
+        var sec2 = document.getElementById('section2Title');
+        var lblSW = document.getElementById('lblSW');
+        var lblSL = document.getElementById('lblSL');
+        var lblSDiff = document.getElementById('lblSDiff');
+        var thSet = document.getElementById('thSetDetails');
+
+        if (drawWrap) drawWrap.style.display = isVolleyball ? 'none' : 'block';
+        if (vbWrap) vbWrap.style.display = isVolleyball ? 'block' : 'none';
+        if (sec2) sec2.innerText = isVolleyball ? 'SETS' : 'GOALS';
+        if (lblSW) lblSW.innerText = isVolleyball ? 'Sets Won' : 'Goals For (GF)';
+        if (lblSL) lblSL.innerText = isVolleyball ? 'Sets Lost' : 'Goals Against (GA)';
+        if (lblSDiff) lblSDiff.innerText = isVolleyball ? 'Sets +/-' : 'Goal Difference (GD)';
+        if (thSet) thSet.style.display = isVolleyball ? '' : 'none';
+      }
+
+      function processCreateTournament() {
+        var btn = document.getElementById('btnCreateTourn');
+        btn.disabled = true;
+        btn.innerText = "Creating...";
+        var data = {
+          sport: document.getElementById('newTournSport').value,
+          year: document.getElementById('newTournYear').value,
+          status: document.getElementById('newTournStatus').value,
+          name: document.getElementById('newTournName').value,
+          deadline: document.getElementById('newTournDeadline').value,
+          maxPlayers: document.getElementById('newTournMaxP').value,
+          maxOfficials: document.getElementById('newTournMaxO').value,
+          divisions: document.getElementById('newTournDivisions').value,
+          logoLink: document.getElementById('newTournLogoLink').value,
+          rules: document.getElementById('newTournRules').value
         };
-        reader.readAsDataURL(file);
+        google.script.run
+          .withSuccessHandler(function(msg) {
+            showMessage('createTournMsg', msg);
+            document.getElementById('createTournForm').reset();
+            btn.disabled = false;
+            btn.innerText = "+ Create New Tournament";
+            loadTournamentsList();
+          })
+          .withFailureHandler(showError)
+          .createTournament(data);
       }
 
-      function processTeamRegistration() {
-        if (!currentTournament) return;
-        var btn = document.getElementById('teamSubmitBtn');
-        var fileInput = document.getElementById('teamLogo');
-        var linkInput = document.getElementById('teamLogoLink').value;
+      function saveTournamentStatus(row) {
+        var newStatus = document.getElementById('tStatus_' + row).value;
+        google.script.run
+          .withSuccessHandler(function(msg) {
+            showMessage('tournListMsg', msg);
+            loadTournamentsList();
+          })
+          .withFailureHandler(showError)
+          .updateTournamentStatus(row, newStatus);
+      }
+
+      function loadApprovals() {
+        if (!selectedTournament) return;
+        var tbody = document.getElementById('approvalsTableBody');
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Loading teams...</td></tr>';
+        google.script.run
+          .withSuccessHandler(function(teams) {
+            if (!teams || teams.length === 0) {
+              tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No teams registered for this tournament yet.</td></tr>';
+              return;
+            }
+            tbody.innerHTML = teams.map(function(t) {
+              var g = t.group || "";
+              return '<tr>' +
+                '<td><strong>' + t.name + '</strong></td>' +
+                '<td>' + t.division + '</td>' +
+                '<td>' + t.captain + '</td>' +
+                '<td><select id="teamGroup_' + t.row + '" class="status-select">' +
+                  '<option value="" ' + (g === '' ? 'selected' : '') + '>- None -</option>' +
+                  '<option value="Group A" ' + (g === 'Group A' ? 'selected' : '') + '>Group A</option>' +
+                  '<option value="Group B" ' + (g === 'Group B' ? 'selected' : '') + '>Group B</option>' +
+                  '<option value="Group C" ' + (g === 'Group C' ? 'selected' : '') + '>Group C</option>' +
+                  '<option value="Group D" ' + (g === 'Group D' ? 'selected' : '') + '>Group D</option>' +
+                '</select></td>' +
+                '<td><select id="teamStatus_' + t.row + '" class="status-select">' +
+                  '<option value="Pending" ' + (t.status === 'Pending' ? 'selected' : '') + '>Pending</option>' +
+                  '<option value="Approved" ' + (t.status === 'Approved' ? 'selected' : '') + '>Approved</option>' +
+                  '<option value="Rejected" ' + (t.status === 'Rejected' ? 'selected' : '') + '>Rejected</option>' +
+                '</select></td>' +
+                '<td><button class="status-btn" onclick="saveTeamStatus(' + t.row + ')">Update</button></td>' +
+              '</tr>';
+            }).join('');
+          })
+          .withFailureHandler(showError)
+          .getTeamsForApproval(selectedTournament.id);
+      }
+
+      function saveTeamStatus(row) {
+        var newStatus = document.getElementById('teamStatus_' + row).value;
+        var newGroup = document.getElementById('teamGroup_' + row).value;
+        google.script.run
+          .withSuccessHandler(function(msg) {
+            showMessage('approvalMsg', msg);
+            loadApprovals();
+          })
+          .withFailureHandler(showError)
+          .updateTeamStatus(row, newStatus, newGroup);
+      }
+
+      function loadTeams() {
+        if (!selectedTournament) return;
+        google.script.run
+          .withSuccessHandler(function(teams) {
+            var options = '<option value="">Select Team</option>';
+            (teams || []).forEach(function(team) {
+              var nameStr = String(team || "");
+              var safe = nameStr.replace(/"/g, '&quot;');
+              options += '<option value="' + safe + '">' + nameStr + '</option>';
+            });
+            ['updTeam', 'fixTeamA', 'fixTeamB', 'logoTeamSelect'].forEach(function(id) {
+              var el = document.getElementById(id);
+              if (el) el.innerHTML = options;
+            });
+          })
+          .withFailureHandler(showError)
+          .getTeams(selectedTournament.id);
+      }
+
+      function submitPointsUpdate() {
+        if (!selectedTournament) return;
+        var btn = document.getElementById('btnUpdatePoints');
+        btn.disabled = true;
+        btn.innerText = "Saving...";
+        var isVolleyball = selectedTournament.sport.toLowerCase() === 'volleyball';
+        var data = {
+          tournamentId: selectedTournament.id,
+          teamName: document.getElementById('updTeam').value,
+          mPld: document.getElementById('updMPld').value,
+          mW: document.getElementById('updMW').value,
+          mL: document.getElementById('updML').value,
+          mPts: document.getElementById('updMPts').value,
+          sW: document.getElementById('updSW').value,
+          sL: document.getElementById('updSL').value,
+          sDiff: document.getElementById('updSDiff').value,
+          pW: isVolleyball ? document.getElementById('updPW').value : document.getElementById('updMD').value,
+          pL: isVolleyball ? document.getElementById('updPL').value : 0,
+          pDiff: isVolleyball ? document.getElementById('updPDiff').value : 0
+        };
+        google.script.run
+          .withSuccessHandler(function(msg) {
+            showMessage('updatePointsMsg', msg);
+            btn.disabled = false;
+            btn.innerText = "Save Standings";
+          })
+          .withFailureHandler(showError)
+          .updatePointsTable(data);
+      }
+
+      function triggerRecalculatePoints() {
+        if (!selectedTournament) return;
+        var btn = document.getElementById('btnRecalcPts');
+        btn.disabled = true;
+        btn.innerText = "Calculating...";
+        google.script.run
+          .withSuccessHandler(function(msg) {
+            showMessage('updatePointsMsg', msg);
+            btn.disabled = false;
+            btn.innerText = "⚡ Auto-Calculate from Match Scores";
+          })
+          .withFailureHandler(showError)
+          .recalculatePointsTable(selectedTournament.id);
+      }
+
+      function loadAdminFixtures() {
+        if (!selectedTournament) return;
+        var isVolleyball = selectedTournament.sport.toLowerCase() === 'volleyball';
+        var thSet = document.getElementById('thSetDetails');
+        if (thSet) thSet.style.display = isVolleyball ? '' : 'none';
+
+        var tbody = document.getElementById('adminFixturesBody');
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Loading matches...</td></tr>';
+
+        google.script.run
+          .withSuccessHandler(function(list) {
+            if (!list || list.length === 0) {
+              tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No matches scheduled yet. Add one below!</td></tr>';
+              return;
+            }
+            tbody.innerHTML = list.map(function(m) {
+              var scoreA = "", scoreB = "", setDetails = "";
+              if (m.result && m.result !== "-") {
+                var mainMatch = m.result.match(/^\s*(\d+)\s*[-:]\s*(\d+)/);
+                if (mainMatch) {
+                  scoreA = mainMatch[1];
+                  scoreB = mainMatch[2];
+                }
+                var parenMatch = m.result.match(/\(([^)]+)\)/);
+                if (parenMatch && parenMatch[1]) {
+                  setDetails = parenMatch[1];
+                }
+              }
+
+              var setCell = isVolleyball
+                ? '<td><input type="text" id="setDet_' + m.row + '" value="' + setDetails.replace(/"/g, '&quot;') + '" placeholder="25-20, 25-18" style="margin:0; padding:6px; font-size:12px;"></td>'
+                : '';
+              var groupTag = m.group ? '<br><span style="display:inline-block; margin-top:3px; padding:2px 7px; border-radius:10px; font-size:11px; font-weight:bold; background:#e0f2fe; color:#0369a1;">' + m.group + '</span>' : '';
+
+              return '<tr>' +
+                '<td><strong>' + m.matchId + '</strong>' + groupTag + '</td>' +
+                '<td style="font-size:12px;">' + m.date + '<br>' + m.time + '</td>' +
+                '<td><strong>' + m.teamA + '</strong> <span style="color:#888;">vs</span> <strong>' + m.teamB + '</strong></td>' +
+                '<td><div style="display:flex; align-items:center; justify-content:center; gap:5px;">' +
+                  '<input type="number" min="0" id="scA_' + m.row + '" value="' + scoreA + '" placeholder="A" style="width:58px; margin:0; padding:6px; text-align:center; font-weight:bold;">' +
+                  '<span>-</span>' +
+                  '<input type="number" min="0" id="scB_' + m.row + '" value="' + scoreB + '" placeholder="B" style="width:58px; margin:0; padding:6px; text-align:center; font-weight:bold;">' +
+                '</div></td>' +
+                setCell +
+                '<td><select id="mStat_' + m.row + '" class="status-select">' +
+                  '<option value="Upcoming" ' + (m.status === 'Upcoming' ? 'selected' : '') + '>Upcoming</option>' +
+                  '<option value="Live" ' + (m.status === 'Live' ? 'selected' : '') + '>Live</option>' +
+                  '<option value="Completed" ' + (m.status === 'Completed' ? 'selected' : '') + '>Completed</option>' +
+                '</select></td>' +
+                '<td><button type="button" class="status-btn" id="btnSaveSc_' + m.row + '" onclick="saveMatchScore(' + m.row + ')" style="background-color:#0F3D3E;">Save Score</button></td>' +
+              '</tr>';
+            }).join('');
+          })
+          .withFailureHandler(showError)
+          .getFixturesForAdmin(selectedTournament.id);
+      }
+
+      function saveMatchScore(row) {
+        if (!selectedTournament) return;
+        var scA = document.getElementById('scA_' + row).value;
+        var scB = document.getElementById('scB_' + row).value;
+        var setDetEl = document.getElementById('setDet_' + row);
+        var setDet = setDetEl ? setDetEl.value : "";
+        var statusEl = document.getElementById('mStat_' + row);
+        var status = statusEl.value;
+
+        if (scA !== "" && scB !== "" && status === "Upcoming") {
+          status = "Completed";
+          statusEl.value = "Completed";
+        }
+
+        var btn = document.getElementById('btnSaveSc_' + row);
+        btn.disabled = true;
+        btn.innerText = "Saving...";
+
+        google.script.run
+          .withSuccessHandler(function(msg) {
+            showMessage('scoreUpdateMsg', msg);
+            btn.disabled = false;
+            btn.innerText = "Save Score";
+          })
+          .withFailureHandler(function(err) {
+            btn.disabled = false;
+            btn.innerText = "Save Score";
+            showError(err);
+          })
+          .updateMatchScore({
+            tournamentId: selectedTournament.id,
+            row: row,
+            scoreA: scA,
+            scoreB: scB,
+            setDetails: setDet,
+            status: status
+          });
+      }
+
+      function submitFixture() {
+        if (!selectedTournament) return;
+        var btn = document.getElementById('btnSubmitFixture');
+        btn.disabled = true;
+        btn.innerText = "Saving...";
+        var data = {
+          tournamentId: selectedTournament.id,
+          matchId: document.getElementById('fixId').value,
+          date: document.getElementById('fixDate').value,
+          time: document.getElementById('fixTime').value,
+          teamA: document.getElementById('fixTeamA').value,
+          teamB: document.getElementById('fixTeamB').value,
+          venue: document.getElementById('fixVenue').value,
+          group: document.getElementById('fixGroup').value,
+          status: document.getElementById('fixStatus').value,
+          result: document.getElementById('fixResult').value || "-"
+        };
+        google.script.run
+          .withSuccessHandler(function(msg) {
+            showMessage('addFixtureMsg', msg);
+            document.getElementById('addFixtureForm').reset();
+            btn.disabled = false;
+            btn.innerText = "Save Match";
+            loadAdminFixtures();
+          })
+          .withFailureHandler(showError)
+          .addFixture(data);
+      }
+
+      function processLogoUpdate() {
+        if (!selectedTournament) return;
+        var teamName = document.getElementById('logoTeamSelect').value;
+        var linkInput = document.getElementById('newTeamLogoLink').value;
+        var fileInput = document.getElementById('newTeamLogo');
         var file = fileInput.files[0];
 
-        if (file && file.size > 1024 * 1024 * 3) {
-          showMessage('teamRegMessage', "Error: Image is too large. Limit is 3MB.", true);
-          return;
-        }
-        btn.innerText = "Registering...";
+        if (!teamName) { showMessage('updateLogoMsg', "Error: Please select a team."); return; }
+        if (!linkInput && !file) { showMessage('updateLogoMsg', "Error: Please paste an image link or choose a file."); return; }
+        if (file && file.size > 1024 * 1024 * 3) { showMessage('updateLogoMsg', "Error: Image is too large (Max 3MB)."); return; }
+
+        var btn = document.getElementById('btnUpdateTeamLogo');
         btn.disabled = true;
+        btn.innerText = "Saving Logo...";
 
-        if (file) {
-          compressLogoImage(file, function(base64, mimeType, fileName, dataUrl) {
-            sendTeamData(base64, mimeType, fileName, linkInput, dataUrl);
-          });
-        } else {
-          sendTeamData(null, null, null, linkInput, "");
-        }
-      }
-
-      function sendTeamData(logoBase64, mimeType, fileName, logoLink, logoDataUrl) {
-        var data = {
-          tournamentId: currentTournament.id,
-          teamName: document.getElementById('teamName').value,
-          division: document.getElementById('teamDivision').value,
-          captainName: document.getElementById('captainName').value,
-          email: document.getElementById('teamEmail').value,
-          phone: document.getElementById('teamPhone').value,
-          logoBase64: logoBase64,
-          logoMimeType: mimeType,
-          logoName: fileName,
-          logoLink: logoLink,
-          logoDataUrl: logoDataUrl || ""
-        };
-        apiPost("registerTeam", data, function(msg) {
-          showMessage('teamRegMessage', msg, String(msg).includes("Error"));
-          if (!String(msg).includes("Error")) document.getElementById('teamRegForm').reset();
-          var btn = document.getElementById('teamSubmitBtn');
-          btn.innerText = "Register Team";
-          btn.disabled = false;
-        }, function(err) {
-          showMessage('teamRegMessage', "Error: " + err.message, true);
-          var btn = document.getElementById('teamSubmitBtn');
-          btn.innerText = "Register Team";
-          btn.disabled = false;
-        });
-      }
-
-      function submitPlayersRegistration() {
-        if (!currentTournament) return;
-        var teamName = document.getElementById('playerTeamName').value;
-        var members = [];
-        var memberRows = document.querySelectorAll('.m-name');
-        var jerseyRows = document.querySelectorAll('.m-jersey');
-        var posRows = document.querySelectorAll('.m-position');
-        var phoneRows = document.querySelectorAll('.m-phone');
-
-        for (var i = 0; i < memberRows.length; i++) {
-          if (memberRows[i].value.trim() !== "") {
-            members.push({
-              name: memberRows[i].value,
-              jerseyNumber: jerseyRows[i].value,
-              position: posRows[i].value || "Player",
-              phone: phoneRows[i].value
+        function sendLogo(base64, mime, name) {
+          google.script.run
+            .withSuccessHandler(function(msg) {
+              showMessage('updateLogoMsg', msg);
+              document.getElementById('updateLogoForm').reset();
+              btn.disabled = false;
+              btn.innerText = "Save Team Logo";
+            })
+            .withFailureHandler(showError)
+            .updateTeamLogo({
+              tournamentId: selectedTournament.id,
+              teamName: teamName,
+              logoLink: linkInput,
+              logoBase64: base64,
+              logoMimeType: mime,
+              logoName: name
             });
-          }
         }
 
-        if (members.length === 0) {
-          showMessage('playerRegMessage', "Please add at least one player or official.", true);
-          return;
+        if (file && !linkInput) {
+          var reader = new FileReader();
+          reader.onload = function(e) { sendLogo(e.target.result.split(',')[1], file.type, file.name); };
+          reader.readAsDataURL(file);
+        } else {
+          sendLogo(null, null, null);
         }
-        var btn = document.getElementById('rosterSubmitBtn');
-        btn.innerText = "Submitting roster...";
+      }
+
+      function populateSettingsForm() {
+        if (!selectedTournament) return;
+        document.getElementById('editName').value = selectedTournament.name || "";
+        document.getElementById('editStatus').value = selectedTournament.status || "Active";
+        document.getElementById('editDeadline').value = selectedTournament.deadline || "";
+        document.getElementById('editMaxP').value = selectedTournament.maxPlayers || 14;
+        document.getElementById('editMaxO').value = selectedTournament.maxOfficials || 3;
+        document.getElementById('editDivisions').value = selectedTournament.divisions || "Both";
+        document.getElementById('editRules').value = selectedTournament.rules || "";
+        document.getElementById('editLogoLink').value = selectedTournament.logo || "";
+      }
+
+      function processSettingsUpdate() {
+        if (!selectedTournament) return;
+        var btn = document.getElementById('btnUpdateSettings');
         btn.disabled = true;
+        btn.innerText = "Saving...";
+        var file = document.getElementById('editLogoFile').files[0];
+        var link = document.getElementById('editLogoLink').value;
 
-        apiPost("registerPlayers", {
-          tournamentId: currentTournament.id,
-          teamName: teamName,
-          members: members
-        }, function(msg) {
-          showMessage('playerRegMessage', msg, String(msg).includes("Error"));
-          if (!String(msg).includes("Error")) document.getElementById('playerRegForm').reset();
-          btn.innerText = "Submit Full Roster";
-          btn.disabled = false;
-        }, function(err) {
-          showMessage('playerRegMessage', "Error: " + err.message, true);
-          btn.innerText = "Submit Full Roster";
-          btn.disabled = false;
-        });
+        function sendSettings(base64, mime, name) {
+          google.script.run
+            .withSuccessHandler(function(msg) {
+              showMessage('settingsMsg', msg);
+              btn.disabled = false;
+              btn.innerText = "Save Tournament Settings";
+              loadTournamentsList();
+            })
+            .withFailureHandler(showError)
+            .updateTournamentSettings({
+              tournamentId: selectedTournament.id,
+              name: document.getElementById('editName').value,
+              status: document.getElementById('editStatus').value,
+              deadline: document.getElementById('editDeadline').value,
+              maxPlayers: document.getElementById('editMaxP').value,
+              maxOfficials: document.getElementById('editMaxO').value,
+              divisions: document.getElementById('editDivisions').value,
+              rules: document.getElementById('editRules').value,
+              logoLink: link,
+              logoBase64: base64,
+              logoMimeType: mime,
+              logoName: name
+            });
+        }
+
+        if (file && !link) {
+          var reader = new FileReader();
+          reader.onload = function(e) { sendSettings(e.target.result.split(',')[1], file.type, file.name); };
+          reader.readAsDataURL(file);
+        } else {
+          sendSettings(null, null, null);
+        }
       }
     </script>
   </body>
