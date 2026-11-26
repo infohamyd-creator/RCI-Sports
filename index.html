@@ -436,7 +436,7 @@
        * Leave blank ("") if running directly inside Google Apps Script.
        * =========================================================================
        */
-      var API_URL = "https://script.google.com/macros/s/AKfycbyHZal8n91jtjqAs8WUjqbFclhWysWBXUS8kBfT1Kkx90X9-CPvmP5MNYUZDsCpjXVBgQ/exec";
+      var API_URL = "";
 
       var allTournaments = [];
       var selectedSport = 'Volleyball';
@@ -525,7 +525,7 @@
       }
 
       function apiPost(action, payload, onSuccess, onFailure) {
-        if (API_URL && API_URL.trim() !== "") {
+        if (API_URL && API_URL.trim() !== "https://script.google.com/macros/s/AKfycbyHZal8n91jtjqAs8WUjqbFclhWysWBXUS8kBfT1Kkx90X9-CPvmP5MNYUZDsCpjXVBgQ/exec") {
           // text/plain avoids CORS preflight OPTIONS request on Google Apps Script
           fetch(API_URL.trim(), {
             method: "POST",
@@ -666,10 +666,10 @@
         // Adapt Team Registration division dropdown to tournament's active divisions
         var divSelect = document.getElementById('teamDivision');
         if (divSelect) {
-          var divSetting = String(currentTournament.divisions || "Both");
-          if (divSetting === "Men's Only") {
+          var vis = getDivisionVisibility(currentTournament.divisions);
+          if (vis.showMens && !vis.showWomens) {
             divSelect.innerHTML = '<option value="Men\'s">Men\'s Division</option>';
-          } else if (divSetting === "Women's Only") {
+          } else if (!vis.showMens && vis.showWomens) {
             divSelect.innerHTML = '<option value="Women\'s">Women\'s Division</option>';
           } else {
             divSelect.innerHTML = '<option value="Men\'s">Men\'s Division</option><option value="Women\'s">Women\'s Division</option>';
@@ -781,6 +781,16 @@
         return '<span class="' + cls + '">' + g + '</span>';
       }
 
+      function getDivisionVisibility(divSetting) {
+        var d = String(divSetting || "Both").trim().toLowerCase().replace(/[’']/g, "'");
+        var isMensOnly = (d.indexOf("men") > -1 && d.indexOf("women") === -1 && d.indexOf("both") === -1);
+        var isWomensOnly = (d.indexOf("women") > -1 && d.indexOf("both") === -1);
+        return {
+          showMens: !isWomensOnly,
+          showWomens: !isMensOnly
+        };
+      }
+
       function loadTeamDropdown() {
         var select = document.getElementById('playerTeamName');
         if (!select || !currentTournament) return;
@@ -817,9 +827,9 @@
           currentApprovedTeams = teams.map(function(t, idx) {
             return { name: t.name, logo: t.logo, division: t.division, group: t.group || "", _idx: idx };
           });
-          var divSetting = String(currentTournament.divisions || "Both");
-          var showMens = (divSetting !== "Women's Only");
-          var showWomens = (divSetting !== "Men's Only");
+          var vis = getDivisionVisibility(currentTournament.divisions);
+          var showMens = vis.showMens;
+          var showWomens = vis.showWomens;
 
           var mensTeams = currentApprovedTeams.filter(function(t) { return !t.division.toLowerCase().includes("women"); });
           var womensTeams = currentApprovedTeams.filter(function(t) { return t.division.toLowerCase().includes("women"); });
@@ -987,9 +997,9 @@
             }).join('');
           }
 
-          var divSetting = String(currentTournament.divisions || "Both");
-          var showMens = (divSetting !== "Women's Only");
-          var showWomens = (divSetting !== "Men's Only");
+          var vis = getDivisionVisibility(currentTournament.divisions);
+          var showMens = vis.showMens && (mens.length > 0 || (!vis.showWomens && womens.length === 0));
+          var showWomens = vis.showWomens && (womens.length > 0 || (!vis.showMens && mens.length === 0));
           var singleDiv = !(showMens && showWomens);
           var finalHtml = "";
 
