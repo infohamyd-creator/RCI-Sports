@@ -6,18 +6,60 @@ function verifyAdminPassword(inputPassword) {
   return String(inputPassword || "").trim() === String(ADMIN_PASSWORD).trim();
 }
 
-function doGet() {
+function jsonResponse(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function doGet(e) {
+  if (e && e.parameter && e.parameter.action) {
+    try {
+      var action = e.parameter.action;
+      var tid = e.parameter.tournamentId || "";
+      if (action === "getTournaments") return jsonResponse({ ok: true, data: getTournaments() });
+      if (action === "getTeamsForApproval") return jsonResponse({ ok: true, data: getTeamsForApproval(tid) });
+      if (action === "getTeams") return jsonResponse({ ok: true, data: getTeams(tid) });
+      if (action === "getFixturesForAdmin") return jsonResponse({ ok: true, data: getFixturesForAdmin(tid) });
+      return jsonResponse({ ok: false, error: "Unknown action: " + action });
+    } catch (err) {
+      return jsonResponse({ ok: false, error: err.message });
+    }
+  }
+
   var possibleNames = ['AdminIndex', 'Index', 'Admin', 'index', 'admin'];
   for (var i = 0; i < possibleNames.length; i++) {
     try {
       return HtmlService.createHtmlOutputFromFile(possibleNames[i])
           .setTitle('Admin Panel - Multi-Sport Tournament Portal')
           .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
-    } catch (e) {
+    } catch (err) {
       // Try next file name
     }
   }
   throw new Error("No HTML file found. Please rename your HTML file in Apps Script to 'AdminIndex' or 'Index'.");
+}
+
+function doPost(e) {
+  try {
+    var body = JSON.parse(e.postData.contents);
+    var action = body.action;
+    var payload = body.payload || {};
+
+    if (action === "verifyAdminPassword") return jsonResponse({ ok: true, data: verifyAdminPassword(payload.password) });
+    if (action === "createTournament") return jsonResponse({ ok: true, data: createTournament(payload) });
+    if (action === "updateTournamentStatus") return jsonResponse({ ok: true, data: updateTournamentStatus(payload.row, payload.status) });
+    if (action === "updateTournamentSettings") return jsonResponse({ ok: true, data: updateTournamentSettings(payload) });
+    if (action === "updateTeamStatus") return jsonResponse({ ok: true, data: updateTeamStatus(payload.row, payload.status, payload.group) });
+    if (action === "updatePointsTable") return jsonResponse({ ok: true, data: updatePointsTable(payload) });
+    if (action === "addFixture") return jsonResponse({ ok: true, data: addFixture(payload) });
+    if (action === "updateMatchScore") return jsonResponse({ ok: true, data: updateMatchScore(payload) });
+    if (action === "recalculatePointsTable") return jsonResponse({ ok: true, data: recalculatePointsTable(payload.tournamentId) });
+    if (action === "updateTeamLogo") return jsonResponse({ ok: true, data: updateTeamLogo(payload) });
+
+    return jsonResponse({ ok: false, error: "Unknown action: " + action });
+  } catch (err) {
+    return jsonResponse({ ok: false, error: err.message });
+  }
 }
 
 function matchesTournament(cellValue, targetId) {
