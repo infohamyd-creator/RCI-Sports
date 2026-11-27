@@ -492,6 +492,82 @@
           errEl.style.display = "block";
         });
       }
+
+      function lockAdminPanel() {
+        document.getElementById('adminMainContent').style.display = "none";
+        document.getElementById('adminLoginOverlay').style.display = "block";
+        document.getElementById('adminLoginError').style.display = "none";
+        var pwdInput = document.getElementById('adminPasswordInput');
+        if (pwdInput) { pwdInput.value = ""; pwdInput.focus(); }
+      }
+
+      function openTab(evt, tabName) {
+        currentTab = tabName;
+        var tabcontent = document.getElementsByClassName("tabcontent");
+        for (var i = 0; i < tabcontent.length; i++) {
+          tabcontent[i].style.display = "none";
+        }
+        var tablinks = document.getElementsByClassName("tablinks");
+        for (var j = 0; j < tablinks.length; j++) {
+          tablinks[j].className = tablinks[j].className.replace(" active", "");
+        }
+        var target = document.getElementById(tabName);
+        if (target) target.style.display = "block";
+        if (evt && evt.currentTarget) {
+          evt.currentTarget.className += " active";
+        }
+        var msgs = document.getElementsByClassName("message");
+        for (var k = 0; k < msgs.length; k++) {
+          msgs[k].style.display = "none";
+        }
+      }
+
+      function showMessage(elementId, text) {
+        var el = document.getElementById(elementId);
+        if (!el) return;
+        el.innerText = text;
+        el.style.display = "block";
+      }
+
+      function showError(err) {
+        var banner = document.getElementById('globalErrorBanner');
+        if (banner) {
+          banner.innerText = "⚠️ Error: " + (err && err.message ? err.message : String(err));
+          banner.style.display = "block";
+        }
+      }
+
+      function onAdminTournamentChange() {
+        var select = document.getElementById('adminTournamentSelect');
+        var tid = select ? select.value : "";
+        selectedTournament = allTournaments.find(function(t) { return t.id === tid; }) || null;
+        adaptStandingsFormToSport();
+
+        if (currentTab === 'ApprovalsTab') loadApprovals();
+        else if (currentTab === 'UpdatePointsTab') loadTeams();
+        else if (currentTab === 'AddFixtureTab') { loadTeams(); loadAdminFixtures(); }
+        else if (currentTab === 'UpdateLogoTab') loadTeams();
+        else if (currentTab === 'SettingsTab') populateSettingsForm();
+      }
+
+      function adaptStandingsFormToSport() {
+        if (!selectedTournament) return;
+        var isVolleyball = String(selectedTournament.sport || "").toLowerCase() === 'volleyball';
+        var drawWrap = document.getElementById('drawFieldWrap');
+        var vbPtsWrap = document.getElementById('volleyballPointsWrap');
+        var sec2 = document.getElementById('section2Title');
+        var lblSW = document.getElementById('lblSW');
+        var lblSL = document.getElementById('lblSL');
+        var lblSDiff = document.getElementById('lblSDiff');
+
+        if (drawWrap) drawWrap.style.display = isVolleyball ? 'none' : 'block';
+        if (vbPtsWrap) vbPtsWrap.style.display = isVolleyball ? 'block' : 'none';
+        if (sec2) sec2.innerText = isVolleyball ? 'SETS' : 'GOALS';
+        if (lblSW) lblSW.innerText = isVolleyball ? 'Sets Won' : 'Goals For (GF)';
+        if (lblSL) lblSL.innerText = isVolleyball ? 'Sets Lost' : 'Goals Against (GA)';
+        if (lblSDiff) lblSDiff.innerText = isVolleyball ? 'Sets +/-' : 'Goal Diff (GD)';
+      }
+
       function loadTournamentsList() {
         adminApiGet("getTournaments", {}, function(list) {
           allTournaments = list || [];
