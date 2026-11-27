@@ -436,7 +436,7 @@
        * Leave blank ("") if running directly inside Google Apps Script.
        * =========================================================================
        */
-      var API_URL = "";
+      var API_URL = "https://script.google.com/macros/s/AKfycbyHZal8n91jtjqAs8WUjqbFclhWysWBXUS8kBfT1Kkx90X9-CPvmP5MNYUZDsCpjXVBgQ/exec";
 
       var allTournaments = [];
       var selectedSport = 'Volleyball';
@@ -458,7 +458,7 @@
       function apiGet(action, params, onSuccess, onFailure) {
         if (API_URL && API_URL.trim() !== "") {
           var qs = new URLSearchParams(Object.assign({ action: action, _t: Date.now() }, params || {})).toString();
-          fetch(API_URL.trim() + "?" + qs, { method: "GET", cache: "no-store" })
+          fetch(API_URL.trim() + "?" + qs, { method: "GET", redirect: "follow" })
             .then(function(res) { return res.json(); })
             .then(function(json) {
               if (json && json.ok) { if (onSuccess) onSuccess(json.data); }
@@ -525,10 +525,11 @@
       }
 
       function apiPost(action, payload, onSuccess, onFailure) {
-        if (API_URL && API_URL.trim() !== "https://script.google.com/macros/s/AKfycbyHZal8n91jtjqAs8WUjqbFclhWysWBXUS8kBfT1Kkx90X9-CPvmP5MNYUZDsCpjXVBgQ/exec") {
+        if (API_URL && API_URL.trim() !== "") {
           // text/plain avoids CORS preflight OPTIONS request on Google Apps Script
           fetch(API_URL.trim(), {
             method: "POST",
+            redirect: "follow",
             headers: { "Content-Type": "text/plain;charset=utf-8" },
             body: JSON.stringify({ action: action, payload: payload })
           })
